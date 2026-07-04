@@ -53,21 +53,33 @@ with c4:
     idx_ambito = AMBITOS.index("Investigación") if ua == "Secretaría Investigación" else 0
     ambito = st.selectbox("Ámbito *", AMBITOS, index=idx_ambito, key="ambito")
 with c5:
-    es_investigacion = st.selectbox(
-        "¿Es tema de investigación? *",
-        ["No", "Sí"],
-        index=1 if ua == "Secretaría Investigación" else 0,
-        key="es_investigacion",
-    )
+    if ua == "Secretaría Investigación":
+        st.session_state["es_investigacion"] = "Sí"
+        st.selectbox(
+            "¿Es tema de investigación? *",
+            ["Sí"],
+            index=0,
+            disabled=True,
+            key="es_investigacion",
+            help="La Secretaría Investigación usa siempre el formulario del Consejo de Investigación.",
+        )
+        es_inv = True
+    else:
+        es_investigacion = st.selectbox(
+            "¿Es tema de investigación? *",
+            ["No", "Sí"],
+            index=0,
+            key="es_investigacion",
+        )
+        es_inv = es_investigacion == "Sí"
 
-es_inv = es_investigacion == "Sí"
 bloque_inv_raw: dict | None = None
 tipo = ""
 actividad = ""
 detalle = ""
 
 if es_inv:
-    bloque_inv_raw = render_campos_investigacion(key="carga")
+    bloque_inv_raw = render_campos_investigacion(key="carga", unidad_carga=ua)
     tipo = bloque_inv_raw["tipo_ci"]
     actividad = bloque_inv_raw.get("titulo", "")
     detalle = bloque_inv_raw.get("descripcion", "")

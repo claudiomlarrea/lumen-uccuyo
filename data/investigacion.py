@@ -69,6 +69,32 @@ ACTAS_CI_2026: dict[int, str] = {
 }
 
 
+MAX_UNIDADES_ACADEMICAS = 5
+
+# Unidades elegibles en carga CI (facultades, escuelas, institutos — no órganos de gobierno)
+UNIDADES_CI = [
+    "Facultad de Ciencias Médicas San Juan",
+    "Facultad de Ciencias Médicas San Luis",
+    "Facultad de Ciencias Económicas y Empresariales San Juan",
+    "Facultad de Ciencias Económicas y Empresariales San Luis",
+    "Facultad de Derecho y Ciencias Sociales San Juan",
+    "Facultad de Derecho y Ciencias Sociales San Luis",
+    "Facultad de Filosofía y Humanidades",
+    "Facultad de Ciencias Químicas y Tecnológicas",
+    "Facultad de Educación",
+    "Facultad de Ciencias Veterinarias",
+    "Facultad Don Bosco",
+    "Escuela de Cultura Religiosa y Pastoral",
+    "Escuela de Seguridad",
+    "Instituto de Formación Docentes Santa María",
+    "Instituto de Formación Docentes San Buenaventura",
+    "Secretaría Investigación",
+    "Observatorio de Inteligencia Artificial",
+    "Departamento de Educación a Distancia",
+    "Vicerrector/a de Formación",
+]
+
+
 def contar_palabras(texto: str) -> int:
     return len(re.findall(r"\S+", str(texto or "").strip()))
 
@@ -152,6 +178,11 @@ def validar_campos_investigacion(tipo_ci: str, data: dict[str, Any]) -> list[str
         eq = str(data.get("equipo") or "")
         if contar_palabras(eq) > 50:
             errores.append("El equipo no puede superar 50 palabras.")
+    unidades = data.get("unidades_academicas") or []
+    if not unidades:
+        errores.append("Seleccioná al menos una unidad académica.")
+    elif len(unidades) > MAX_UNIDADES_ACADEMICAS:
+        errores.append(f"Solo podés elegir hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas.")
     return errores
 
 
@@ -178,6 +209,9 @@ def armar_bloque_investigacion(tipo_ci: str, raw: dict[str, Any]) -> dict[str, A
                 "dni_docente": str(raw.get("dni_docente") or "").strip(),
             }
         )
+        unidades = raw.get("unidades_academicas") or []
+        if unidades:
+            bloque["unidades_academicas"] = "; ".join(unidades)
         return bloque
 
     if requiere_equipo(tipo_ci):
@@ -206,4 +240,7 @@ def armar_bloque_investigacion(tipo_ci: str, raw: dict[str, Any]) -> dict[str, A
             "monto_financiamiento": monto,
         }
     )
+    unidades = raw.get("unidades_academicas") or []
+    if unidades:
+        bloque["unidades_academicas"] = "; ".join(unidades)
     return bloque

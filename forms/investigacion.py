@@ -9,15 +9,17 @@ import streamlit as st
 from data.investigacion import (
     ACTAS_CI_2026,
     CATEGORIAS_INVESTIGADOR,
+    MAX_UNIDADES_ACADEMICAS,
     TIPOS_CI,
     TIPOS_FINANCIAMIENTO,
+    UNIDADES_CI,
     es_categorizacion,
     requiere_equipo,
     requiere_puntaje,
 )
 
 
-def render_campos_investigacion(*, key: str = "inv") -> dict[str, Any]:
+def render_campos_investigacion(*, key: str = "inv", unidad_carga: str = "") -> dict[str, Any]:
     """Muestra campos CI según tipo y devuelve dict crudo para validar/armar bloque."""
     st.markdown("#### Datos Consejo de Investigación")
     st.caption(
@@ -111,6 +113,23 @@ def render_campos_investigacion(*, key: str = "inv") -> dict[str, Any]:
                 placeholder="Ej: 657",
                 key=f"{key}_res_cs",
             )
+
+    st.markdown("**Unidad académica**")
+    st.caption(
+        f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. "
+        "Indicá a qué UA pertenece el tema (como en el sistema productivo)."
+    )
+    default_ua: list[str] = []
+    if unidad_carga and unidad_carga in UNIDADES_CI and unidad_carga != "Secretaría Investigación":
+        default_ua = [unidad_carga]
+    raw["unidades_academicas"] = st.multiselect(
+        "Unidades académicas del tema *",
+        UNIDADES_CI,
+        default=default_ua,
+        max_selections=MAX_UNIDADES_ACADEMICAS,
+        key=f"{key}_unidades",
+        label_visibility="collapsed",
+    )
 
     if not es_categorizacion(tipo_ci):
         c_fin1, c_fin2, c_fin3 = st.columns(3)

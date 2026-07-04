@@ -126,7 +126,8 @@ def _agregar_tema_ci(doc: Document, contador: int, tema: dict[str, Any]) -> int:
     if equipo:
         p.add_run(f"   Equipo: {equipo.replace(chr(10), '; ')}\n")
 
-    p.add_run(f"   Unidad Académica: {tema.get('unidad_academica', '—')}\n")
+    ua_word = inv.get("unidades_academicas") or tema.get("unidad_academica", "—")
+    p.add_run(f"   Unidad Académica: {ua_word}\n")
 
     txt_puntaje = puntaje_texto_para_word(inv.get("puntaje"))
     if txt_puntaje:
