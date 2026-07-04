@@ -35,7 +35,7 @@ def css() -> str:
     section[data-testid="stMain"] label {{
         color: {TEXTO};
     }}
-    section[data-testid="stMain"] span:not(.stButton span):not(.stDownloadButton span) {{
+    section[data-testid="stMain"] span:not(.stButton span):not(.stDownloadButton span):not([data-testid="stFormSubmitButton"] span):not([data-testid="stBaseButton-primary"] span):not([data-testid="stBaseButton-secondary"] span) {{
         color: {TEXTO};
     }}
     section[data-testid="stMain"] .stCaption,
@@ -137,6 +137,8 @@ def css() -> str:
     section[data-testid="stMain"] div.stButton > button,
     section[data-testid="stMain"] div.stButton > button[kind="primary"],
     section[data-testid="stMain"] .stDownloadButton > button,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] > button,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button,
     section[data-testid="stMain"] [data-testid="stBaseButton-primary"],
     section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] {{
         background-color: {VERDE} !important;
@@ -151,14 +153,39 @@ def css() -> str:
     section[data-testid="stMain"] div.stButton > button div,
     section[data-testid="stMain"] .stDownloadButton > button p,
     section[data-testid="stMain"] .stDownloadButton > button span,
-    section[data-testid="stMain"] .stDownloadButton > button div {{
+    section[data-testid="stMain"] .stDownloadButton > button div,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button p,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button span,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button div,
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary"] p,
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary"] span,
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary"] div,
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] p,
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] span,
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] div {{
         color: {BLANCO} !important;
     }}
     section[data-testid="stMain"] div.stButton > button:hover,
-    section[data-testid="stMain"] .stDownloadButton > button:hover {{
+    section[data-testid="stMain"] .stDownloadButton > button:hover,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:hover,
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary"]:hover,
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"]:hover {{
         background-color: {VERDE_OSCURO} !important;
         background: {VERDE_OSCURO} !important;
         color: {BLANCO} !important;
+    }}
+    /* Cancelar en formularios — fondo claro, texto verde oscuro */
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button[kind="secondary"],
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"][kind="secondary"] {{
+        background-color: {BLANCO} !important;
+        background: {BLANCO} !important;
+        color: {VERDE} !important;
+        border: 1px solid {VERDE} !important;
+    }}
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button[kind="secondary"] p,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button[kind="secondary"] span,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button[kind="secondary"] div {{
+        color: {VERDE} !important;
     }}
     </style>
     """
