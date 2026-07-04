@@ -30,7 +30,7 @@ from data.storage import (
     load_temas,
 )
 from services.orden_dia import generar_orden_del_dia, nombre_archivo_od
-from ui import guardar_word_para_descarga, mostrar_descarga_word, setup_page, sidebar_brand
+from ui import boton_descarga_word, setup_page, sidebar_brand
 
 setup_page("Orden del día · LUMEN")
 sidebar_brand("Orden del día")
@@ -103,9 +103,7 @@ def _boton_descarga(
             None,
         )
         archivo = nombre_archivo_od(organo, ua_doc, anio_doc, fecha_doc, fecha_iso=fecha_iso)
-        guardar_word_para_descarga(doc_bytes, archivo, dl_key=key)
-
-    mostrar_descarga_word(key)
+        boton_descarga_word(doc_bytes, archivo, dl_key=key)
 
 
 def _temas_cs_sesion(anio: str, fecha_legible: str | None = None) -> list[dict]:

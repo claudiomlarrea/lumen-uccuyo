@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
 
 import streamlit as st
@@ -13,34 +14,18 @@ ROOT = Path(__file__).resolve().parent
 LOGO = ROOT / "assets" / "logo_uccuyo.png"
 LOGO_BADGE = ROOT / "assets" / "logo_uccuyo_badge.png"
 
-MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
-
-def guardar_word_para_descarga(data: bytes, file_name: str, *, dl_key: str) -> None:
-    """Guarda el Word en sesión para el botón de descarga (patrón Consejo de Investigación)."""
-    st.session_state[f"lumen_od_{dl_key}"] = {"bytes": data, "name": file_name}
-
-
-def mostrar_descarga_word(dl_key: str) -> None:
-    """Muestra botón de descarga .docx vía Streamlit (funciona en Streamlit Cloud)."""
-    payload = st.session_state.get(f"lumen_od_{dl_key}")
-    if not payload:
-        return
-
-    data = payload["bytes"]
-    file_name = payload["name"]
-
+def boton_descarga_word(doc_bytes: bytes, file_name: str, *, dl_key: str) -> None:
+    """Descarga .docx inmediata tras generar (mismo patrón que Consejo de Investigación)."""
+    buffer = BytesIO(doc_bytes)
+    buffer.seek(0)
     st.success(f"Documento **{file_name}** generado correctamente.")
     st.download_button(
-        f"Descargar Word — {file_name}",
-        data=data,
+        "Descargar Orden del Día",
+        data=buffer,
         file_name=file_name,
-        mime=MIME_DOCX,
-        key=f"dl_word_{dl_key}",
-        type="primary",
-        use_container_width=True,
+        key=f"dl_{dl_key}",
     )
-    st.caption("El archivo debe terminar en **.docx** y abrirse con Microsoft Word.")
 
 
 def _fijar_idioma_es() -> None:
