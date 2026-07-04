@@ -30,6 +30,7 @@ from data.storage import (
     incorporar_tema_cs,
     load_temas,
 )
+from forms.editar_tema import render_editar_tema
 from services.orden_dia import generar_orden_del_dia, nombre_archivo_od
 from ui import guardar_word_en_sesion, mostrar_descarga_word, setup_page, sidebar_brand
 
@@ -58,6 +59,12 @@ def _tarjeta_tema(tema: dict) -> None:
     if tema.get("elevado_desde_cd"):
         origen = tema.get("organo_origen", "CD")
         elevacion = f"<br/>Elevado desde {origen} ({tema.get('fecha_cd', '—')})"
+    devolucion = ""
+    if tema.get("devuelto_sga_en"):
+        obs = tema.get("observacion_sga", "")
+        devolucion = "<br/><strong>Devuelto por SGA</strong>"
+        if obs:
+            devolucion += f" — {obs}"
     st.markdown(
         f"""
         <div class="lumen-card">
@@ -65,7 +72,7 @@ def _tarjeta_tema(tema: dict) -> None:
         <div class="lumen-meta">
         <strong>{tema.get('id')}</strong> · {tema.get('unidad_academica')} · {tema.get('sede')} · {tema.get('anio')}<br/>
         Sesión: {tema.get('organo_tratamiento', '—')} · {tema.get('fecha_reunion', 'Sin fecha')}<br/>
-        Estado: {_fmt_estado(tema.get('estado', ''))}{elevacion}<br/>
+        Estado: {_fmt_estado(tema.get('estado', ''))}{elevacion}{devolucion}<br/>
         PEI: {"Sí — " + tema.get('objetivo_especifico','') if tema.get('impacta_pei') else "No"}
         </div>
         </div>
@@ -207,24 +214,45 @@ with tab_ua:
         st.info(f"No hay temas de **{organo_cd}** para los filtros elegidos.")
     else:
         st.markdown("#### Temas de la sesión")
+        edit_id = st.session_state.get("lumen_edit_tema_id")
         for tema in filtro_fecha:
             _tarjeta_tema(tema)
+            if tema.get("devuelto_sga_en"):
+                st.warning(
+                    "Tema **devuelto por la Secretaría General Académica**. "
+                    "Podés modificarlo, aprobarlo nuevamente en consejo o eliminarlo."
+                )
             b1, b2, b3, b4 = st.columns(4)
             with b1:
                 if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
                     actualizar_tema(tema["id"], {"estado": "aprobado_cd"})
                     st.rerun()
             with b2:
+                if st.button("Modificar", key=f"mod_{tema['id']}"):
+                    st.session_state["lumen_edit_tema_id"] = tema["id"]
+                    st.rerun()
+            with b3:
                 if st.button("Marcar borrador", key=f"bor_{tema['id']}"):
                     actualizar_tema(tema["id"], {"estado": "borrador"})
                     st.rerun()
-            with b3:
+            with b4:
                 if st.button("Eliminar", key=f"del_cd_{tema['id']}"):
+                    if st.session_state.get("lumen_edit_tema_id") == tema["id"]:
+                        st.session_state.pop("lumen_edit_tema_id", None)
                     eliminar_tema(tema["id"])
                     st.rerun()
-            with b4:
-                if tema.get("estado") == "aprobado_cd":
-                    st.caption("→ **Elevar a CS**")
+            if tema.get("estado") == "aprobado_cd":
+                st.caption("→ **Elevar a CS** (pestaña *Elevar a Consejo Superior*)")
+
+            if edit_id == tema["id"]:
+                accion = render_editar_tema(tema)
+                if accion == "saved":
+                    st.session_state.pop("lumen_edit_tema_id", None)
+                    st.success("Tema actualizado. Revisá y aprobá en consejo si corresponde.")
+                    st.rerun()
+                if accion == "cancelled":
+                    st.session_state.pop("lumen_edit_tema_id", None)
+                    st.rerun()
 
 # ── Tab 2: OD Consejo Superior (público, todas las UA) ───────────────────────
 with tab_cs:
@@ -447,8 +475,13 @@ with tab_sga:
                         st.rerun()
             with b3:
                 if tema.get("estado") == "pendiente_revision_sga" and tema.get("elevado_desde_cd"):
+                    obs = st.text_input(
+                        "Observación para la UA (opcional)",
+                        key=f"obs_{tema['id']}",
+                        placeholder="Motivo de la devolución",
+                    )
                     if st.button("Devolver a UA", key=f"dev_{tema['id']}"):
-                        devolver_tema_a_cd(tema["id"])
+                        devolver_tema_a_cd(tema["id"], obs)
                         st.rerun()
             with b4:
                 if st.button("Eliminar", key=f"del_sga_{tema['id']}"):

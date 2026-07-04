@@ -19,6 +19,75 @@ from data.investigacion import (
 )
 
 
+def prefill_campos_investigacion(*, key: str, inv: dict[str, Any], tema: dict[str, Any]) -> None:
+    """Carga valores existentes en session_state para edición."""
+    flag = f"{key}_prefilled"
+    if st.session_state.get(flag):
+        return
+
+    inv = inv or {}
+    tipo = inv.get("tipo") or tema.get("tipo_actividad") or TIPOS_CI[0]
+    if tipo not in TIPOS_CI:
+        tipo = TIPOS_CI[0]
+
+    st.session_state[f"{key}_tipo_ci"] = tipo
+    st.session_state[f"{key}_titulo"] = inv.get("titulo") or tema.get("actividad", "")
+    st.session_state[f"{key}_descripcion"] = inv.get("descripcion") or tema.get("detalle", "")
+    st.session_state[f"{key}_puntaje"] = inv.get("puntaje", "")
+
+    for campo, sk in (
+        ("apellido_nombre_docente", "nombre_doc"),
+        ("dni_docente", "dni"),
+        ("director", "director"),
+        ("codirector", "codirector"),
+        ("equipo", "equipo"),
+        ("instituto", "inst"),
+        ("catedra", "catedra"),
+        ("alumnos", "alumnos"),
+        ("resolucion_cd", "res_cd"),
+        ("resolucion_cs", "res_cs"),
+        ("fuente_financiamiento", "fuente_fin"),
+        ("responsable_de_carga", "responsable"),
+    ):
+        val = inv.get(campo, "")
+        if val:
+            st.session_state[f"{key}_{sk}"] = val
+
+    cat_dir = inv.get("cat_director", "Seleccionar")
+    if cat_dir in CATEGORIAS_INVESTIGADOR:
+        st.session_state[f"{key}_cat_dir"] = cat_dir
+    cat_cod = inv.get("cat_codirector", "Seleccionar")
+    if cat_cod in CATEGORIAS_INVESTIGADOR:
+        st.session_state[f"{key}_cat_cod"] = cat_cod
+
+    tipo_fin = inv.get("tipo_financiamiento", "Seleccionar...")
+    if tipo_fin in TIPOS_FINANCIAMIENTO:
+        st.session_state[f"{key}_tipo_fin"] = tipo_fin
+
+    uas_raw = inv.get("unidades_academicas", "")
+    if uas_raw:
+        uas = [u.strip() for u in str(uas_raw).split(";") if u.strip()]
+        uas = [u for u in uas if u in UNIDADES_CI]
+        if uas:
+            st.session_state[f"{key}_unidades"] = uas
+
+    monto = inv.get("monto_financiamiento")
+    if monto not in (None, ""):
+        try:
+            st.session_state[f"{key}_monto"] = int(float(monto))
+        except (TypeError, ValueError):
+            pass
+
+    numero_acta = inv.get("numero_acta")
+    if numero_acta:
+        fecha_acta = inv.get("fecha_acta") or ACTAS_CI_2026.get(int(numero_acta), "")
+        st.session_state[f"{key}_acta"] = f"Acta {numero_acta} — {fecha_acta}"
+    else:
+        st.session_state[f"{key}_acta"] = "— Sin acta —"
+
+    st.session_state[flag] = True
+
+
 def render_campos_investigacion(*, key: str = "inv", unidad_carga: str = "") -> dict[str, Any]:
     """Muestra campos CI según tipo y devuelve dict crudo para validar/armar bloque."""
     st.markdown("#### Datos Consejo de Investigación")

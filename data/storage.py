@@ -81,6 +81,20 @@ def agregar_tema(tema: dict[str, Any]) -> dict[str, Any]:
     return tema
 
 
+def modificar_tema_unidad(tema_id: str, cambios: dict[str, Any]) -> dict[str, Any] | None:
+    """Actualiza un tema de la UA; si fue devuelto por SGA, vuelve a en_orden_del_dia."""
+    temas = load_temas()
+    for t in temas:
+        if t["id"] != tema_id:
+            continue
+        extra: dict[str, Any] = {}
+        if t.get("devuelto_sga_en"):
+            extra["estado"] = "en_orden_del_dia"
+            extra["modificado_tras_devolucion_en"] = datetime.now().isoformat(timespec="seconds")
+        return actualizar_tema(tema_id, {**cambios, **extra})
+    return None
+
+
 def actualizar_tema(tema_id: str, cambios: dict[str, Any]) -> dict[str, Any] | None:
     temas = load_temas()
     for i, t in enumerate(temas):
