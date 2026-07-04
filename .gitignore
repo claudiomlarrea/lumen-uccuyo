@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+*.docx
+.streamlit/secrets.toml
+static/downloads/
+
+# Assets de trabajo del manual de marcas (solo subimos logos finales)
+assets/*
+!assets/logo_uccuyo.png
+!assets/logo_uccuyo_badge.png

@@ -1,0 +1,74 @@
+{
+  "anio": "2026",
+  "organismo": "consejo_superior",
+  "fuente": "Cronograma Consejo Superior 2026.pdf",
+  "cargado_en": "2026-07-04",
+  "reuniones": [
+    {
+      "fecha": "2026-02-27",
+      "sede": "San Juan",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — San Juan"
+    },
+    {
+      "fecha": "2026-03-27",
+      "sede": "Inter-sede",
+      "modalidad": "virtual",
+      "etiqueta": "Consejo Superior — Virtual"
+    },
+    {
+      "fecha": "2026-04-24",
+      "sede": "Rodeo del Medio",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — Rodeo del Medio"
+    },
+    {
+      "fecha": "2026-05-29",
+      "sede": "Inter-sede",
+      "modalidad": "virtual",
+      "etiqueta": "Consejo Superior — Virtual"
+    },
+    {
+      "fecha": "2026-06-26",
+      "sede": "San Luis",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — San Luis"
+    },
+    {
+      "fecha": "2026-07-31",
+      "sede": "Inter-sede",
+      "modalidad": "virtual",
+      "etiqueta": "Consejo Superior — Virtual"
+    },
+    {
+      "fecha": "2026-08-28",
+      "sede": "San Juan",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — San Juan"
+    },
+    {
+      "fecha": "2026-09-25",
+      "sede": "Inter-sede",
+      "modalidad": "virtual",
+      "etiqueta": "Consejo Superior — Virtual"
+    },
+    {
+      "fecha": "2026-10-30",
+      "sede": "San Luis",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — San Luis"
+    },
+    {
+      "fecha": "2026-11-27",
+      "sede": "Inter-sede",
+      "modalidad": "virtual",
+      "etiqueta": "Consejo Superior — Virtual"
+    },
+    {
+      "fecha": "2026-12-18",
+      "sede": "San Juan",
+      "modalidad": "presencial",
+      "etiqueta": "Consejo Superior — San Juan"
+    }
+  ]
+}
