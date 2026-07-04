@@ -224,7 +224,6 @@ UNIDADES_CARGA_CS_DIRECTA = {
     "Vicerrector/a",
     "Vicerrector/a de Formación",
     "Vicerrector/a de Sede",
-    "Consejo Superior",
 }
 
 ETIQUETAS_ESTADO = {
