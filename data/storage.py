@@ -170,9 +170,8 @@ def devolver_tema_a_cd(tema_id: str, observacion: str = "") -> dict[str, Any] | 
             "fecha_reunion_iso": t.get("fecha_cd_iso", t.get("fecha_reunion_iso", "")),
             "elevado_desde_cd": False,
             "devuelto_sga_en": datetime.now().isoformat(timespec="seconds"),
+            "observacion_sga": observacion.strip(),
         }
-        if observacion.strip():
-            cambios["observacion_sga"] = observacion.strip()
         temas[i] = {**t, **cambios, "actualizado_en": datetime.now().isoformat(timespec="seconds")}
         save_temas(temas)
         return temas[i]

@@ -54,6 +54,19 @@ def _fmt_estado(estado: str) -> str:
     return ETIQUETAS_ESTADO.get(estado, estado)
 
 
+def _alerta_devolucion_sga(tema: dict) -> None:
+    """Muestra el motivo de devolución de forma visible para la UA."""
+    if not tema.get("devuelto_sga_en"):
+        return
+    obs = str(tema.get("observacion_sga") or "").strip()
+    if obs:
+        st.error(f"**Motivo de devolución (Secretaría General Académica):** {obs}")
+    st.warning(
+        "Tema **devuelto por la Secretaría General Académica**. "
+        "Podés modificarlo, aprobarlo nuevamente en consejo o eliminarlo."
+    )
+
+
 def _tarjeta_tema(tema: dict) -> None:
     elevacion = ""
     if tema.get("elevado_desde_cd"):
@@ -217,11 +230,7 @@ with tab_ua:
         edit_id = st.session_state.get("lumen_edit_tema_id")
         for tema in filtro_fecha:
             _tarjeta_tema(tema)
-            if tema.get("devuelto_sga_en"):
-                st.warning(
-                    "Tema **devuelto por la Secretaría General Académica**. "
-                    "Podés modificarlo, aprobarlo nuevamente en consejo o eliminarlo."
-                )
+            _alerta_devolucion_sga(tema)
             b1, b2, b3, b4 = st.columns(4)
             with b1:
                 if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
@@ -473,20 +482,26 @@ with tab_sga:
                     if st.button("Aprobar CS", key=f"apcs_{tema['id']}"):
                         actualizar_tema(tema["id"], {"estado": "aprobado_cs"})
                         st.rerun()
-            with b3:
-                if tema.get("estado") == "pendiente_revision_sga" and tema.get("elevado_desde_cd"):
-                    obs = st.text_input(
-                        "Observación para la UA (opcional)",
-                        key=f"obs_{tema['id']}",
-                        placeholder="Motivo de la devolución",
-                    )
-                    if st.button("Devolver a UA", key=f"dev_{tema['id']}"):
-                        devolver_tema_a_cd(tema["id"], obs)
-                        st.rerun()
             with b4:
                 if st.button("Eliminar", key=f"del_sga_{tema['id']}"):
                     eliminar_tema(tema["id"])
                     st.rerun()
+
+            if tema.get("estado") == "pendiente_revision_sga" and tema.get("elevado_desde_cd"):
+                with st.form(f"devolver_{tema['id']}"):
+                    st.caption("Devolver a la unidad académica para corrección")
+                    obs = st.text_area(
+                        "Motivo de devolución *",
+                        key=f"obs_{tema['id']}",
+                        placeholder="Ej: Falta resolución de CD",
+                        height=80,
+                    )
+                    if st.form_submit_button("Devolver a UA", type="primary"):
+                        if not obs.strip():
+                            st.error("Indicá el motivo de devolución para que la UA sepa qué corregir.")
+                        else:
+                            devolver_tema_a_cd(tema["id"], obs)
+                            st.rerun()
 
         with st.expander("Vista tabla"):
             st.dataframe(pd.DataFrame(filtro_cs), use_container_width=True)
