@@ -11,7 +11,7 @@ from styles import css
 
 ROOT = Path(__file__).resolve().parent
 LOGO = ROOT / "assets" / "logo_uccuyo.png"
-LOGO_BADGE = ROOT / "assets" / "logo_uccuyo_badge.png
+LOGO_BADGE = ROOT / "assets" / "logo_uccuyo_badge.png"
 
 MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
