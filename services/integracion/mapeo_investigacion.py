@@ -60,6 +60,7 @@ def fila_consejo_investigacion(tema: dict[str, Any], *, modo: ModoIntegracion | 
     """Dict alineado a columnas del sheet productivo de Consejo de Investigación."""
     modo = modo or ModoIntegracion()
     inv = tema.get("investigacion") or {}
+    tipo = inv.get("tipo") or _tipo_investigacion(tema)
 
     anio = tema.get("anio", "")
     anio_cell: Any = int(anio) if str(anio).isdigit() else anio
@@ -68,7 +69,7 @@ def fila_consejo_investigacion(tema: dict[str, Any], *, modo: ModoIntegracion | 
         "numero_acta": inv.get("numero_acta", tema.get("numero_acta_ci", "")),
         "FECHA": inv.get("fecha_acta", tema.get("fecha_reunion", "")),
         "AÑO": anio_cell,
-        "TIPO": inv.get("tipo") or _tipo_investigacion(tema),
+        "TIPO": tipo,
         "TITULO": inv.get("titulo") or tema.get("actividad", ""),
         "DESCRIPCIÓN": inv.get("descripcion") or tema.get("detalle", ""),
         "DIRECTOR": inv.get("director", ""),

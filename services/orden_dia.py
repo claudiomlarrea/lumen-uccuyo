@@ -29,6 +29,131 @@ def _slug(texto: str) -> str:
     return (limpio or "documento")[:50]
 
 
+from data.investigacion import parse_puntaje
+
+TIPOS_CON_DIRECTOR = frozenset(
+    {
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+    }
+)
+
+
+def puntaje_texto_para_word(raw: Any) -> str | None:
+    """Texto para línea «Puntaje: …» del Word (coma decimal, 2 decimales)."""
+    if raw in (None, ""):
+        return None
+    n = parse_puntaje(raw)
+    if n is None or n <= 0:
+        return None
+    x = float(n)
+    for _ in range(10):
+        if x <= 1000:
+            break
+        if abs(x - round(x)) >= 1e-4:
+            break
+        ri = int(round(x))
+        if ri % 100 != 0:
+            break
+        x = x / 100.0
+    if x <= 0 or x > 1000:
+        return None
+    return f"{x:.2f}".replace(".", ",")
+
+
+def _formato_monto(monto: Any) -> str:
+    try:
+        valor = int(float(monto))
+        return f"${valor:,}".replace(",", ".")
+    except (TypeError, ValueError):
+        return str(monto or "")
+
+
+def _linea_director(nombre: str, categoria: str) -> str:
+    nombre = str(nombre or "").strip()
+    categoria = str(categoria or "").strip()
+    if not nombre and not categoria:
+        return ""
+    if not categoria or categoria.startswith("Seleccionar"):
+        return f"   Director: {nombre}\n"
+    return f"   Director: {nombre} ({categoria})\n"
+
+
+def _linea_codirector(nombre: str, categoria: str) -> str:
+    nombre = str(nombre or "").strip()
+    categoria = str(categoria or "").strip()
+    if not nombre and not categoria:
+        return ""
+    if not categoria or categoria.startswith("Seleccionar"):
+        return f"   Codirector: {nombre}\n"
+    return f"   Codirector: {nombre} ({categoria})\n"
+
+
+def _agregar_tema_ci(doc: Document, contador: int, tema: dict[str, Any]) -> int:
+    inv = tema.get("investigacion") or {}
+    tipo = inv.get("tipo") or tema.get("tipo_actividad", "")
+    titulo = inv.get("titulo") or tema.get("actividad", "")
+    descripcion = inv.get("descripcion") or tema.get("detalle", "")
+
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(4)
+    p.paragraph_format.line_spacing = 1
+
+    run = p.add_run(f"{contador}. {tipo} - {titulo}\n")
+    run.bold = True
+    run.font.color.rgb = VERDE
+
+    if descripcion:
+        p.add_run(f"   Descripción: {descripcion}\n")
+
+    if tipo == "Categorización Docente":
+        if inv.get("apellido_nombre_docente"):
+            p.add_run(f"   Docente: {inv['apellido_nombre_docente']}\n")
+        if inv.get("dni_docente"):
+            p.add_run(f"   DNI: {inv['dni_docente']}\n")
+    elif tipo in TIPOS_CON_DIRECTOR:
+        linea = _linea_director(inv.get("director", ""), inv.get("cat_director", ""))
+        if linea:
+            p.add_run(linea)
+        linea = _linea_codirector(inv.get("codirector", ""), inv.get("cat_codirector", ""))
+        if linea:
+            p.add_run(linea)
+
+    equipo = str(inv.get("equipo") or "").strip()
+    if equipo:
+        p.add_run(f"   Equipo: {equipo.replace(chr(10), '; ')}\n")
+
+    p.add_run(f"   Unidad Académica: {tema.get('unidad_academica', '—')}\n")
+
+    txt_puntaje = puntaje_texto_para_word(inv.get("puntaje"))
+    if txt_puntaje:
+        p.add_run(f"   Puntaje: {txt_puntaje}\n")
+
+    if inv.get("resolucion_cd"):
+        p.add_run(f"   Resolución CD: {inv['resolucion_cd']}\n")
+    if inv.get("resolucion_cs"):
+        p.add_run(f"   Resolución CS del Proyecto: {inv['resolucion_cs']}\n")
+    if inv.get("instituto"):
+        p.add_run(f"   Instituto: {inv['instituto']}\n")
+    if inv.get("catedra"):
+        p.add_run(f"   Cátedra: {inv['catedra']}\n")
+    if inv.get("tipo_financiamiento"):
+        p.add_run(f"   Financiamiento: {inv['tipo_financiamiento']}\n")
+    if inv.get("fuente_financiamiento"):
+        p.add_run(f"   Fuente: {inv['fuente_financiamiento']}\n")
+    if inv.get("responsable_de_carga"):
+        p.add_run(f"   Responsable de carga: {inv['responsable_de_carga']}\n")
+    if inv.get("monto_financiamiento"):
+        p.add_run(f"   Monto: {_formato_monto(inv['monto_financiamiento'])}\n")
+    if inv.get("alumnos"):
+        p.add_run(f"   Alumnos: {inv['alumnos']}\n")
+
+    return contador + 1
+
+
 def generar_orden_del_dia(
     temas: list[dict[str, Any]],
     unidad: str,
@@ -105,6 +230,20 @@ def generar_orden_del_dia(
 
     if not temas:
         doc.add_paragraph("No hay temas cargados para los filtros seleccionados.")
+    elif organo == "Consejo de Investigación":
+        contador = 1
+        unidad_actual = ""
+        for tema in temas:
+            unidad = tema.get("unidad_academica", "—")
+            if unidad != unidad_actual:
+                doc.add_paragraph("")
+                h = doc.add_paragraph()
+                run_h = h.add_run(unidad)
+                run_h.bold = True
+                run_h.font.size = Pt(12)
+                run_h.font.color.rgb = RGBColor(0, 102, 204)
+                unidad_actual = unidad
+            contador = _agregar_tema_ci(doc, contador, tema)
     else:
         for i, tema in enumerate(temas, start=1):
             head = doc.add_paragraph()
