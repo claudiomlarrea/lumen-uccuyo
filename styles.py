@@ -32,8 +32,10 @@ def css() -> str:
     section[data-testid="stMain"] h4,
     section[data-testid="stMain"] p,
     section[data-testid="stMain"] li,
-    section[data-testid="stMain"] label,
-    section[data-testid="stMain"] span {{
+    section[data-testid="stMain"] label {{
+        color: {TEXTO};
+    }}
+    section[data-testid="stMain"] span:not(.stButton span):not(.stDownloadButton span) {{
         color: {TEXTO};
     }}
     section[data-testid="stMain"] .stCaption,
@@ -131,19 +133,32 @@ def css() -> str:
         font-size: 0.82rem;
         text-align: center;
     }}
-    div.stButton > button,
-    div.stButton > button[kind="primary"],
-    .stDownloadButton button {{
+    /* Botones verdes — texto blanco legible */
+    section[data-testid="stMain"] div.stButton > button,
+    section[data-testid="stMain"] div.stButton > button[kind="primary"],
+    section[data-testid="stMain"] .stDownloadButton > button,
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary"],
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] {{
+        background-color: {VERDE} !important;
         background: {VERDE} !important;
-        color: white !important;
+        color: {BLANCO} !important;
         border: none !important;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
     }}
-    div.stButton > button:hover,
-    .stDownloadButton button:hover {{
+    section[data-testid="stMain"] div.stButton > button p,
+    section[data-testid="stMain"] div.stButton > button span,
+    section[data-testid="stMain"] div.stButton > button div,
+    section[data-testid="stMain"] .stDownloadButton > button p,
+    section[data-testid="stMain"] .stDownloadButton > button span,
+    section[data-testid="stMain"] .stDownloadButton > button div {{
+        color: {BLANCO} !important;
+    }}
+    section[data-testid="stMain"] div.stButton > button:hover,
+    section[data-testid="stMain"] .stDownloadButton > button:hover {{
+        background-color: {VERDE_OSCURO} !important;
         background: {VERDE_OSCURO} !important;
-        color: white !important;
+        color: {BLANCO} !important;
     }}
     </style>
     """
