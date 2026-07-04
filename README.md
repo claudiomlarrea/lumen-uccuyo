@@ -44,6 +44,10 @@ No hace falta configuración extra: las descargas Word usan `st.download_button`
 - En Cloud, los cambios persisten mientras la app no se redeploye desde cero.
 - Para producción futura convendrá conectar Google Sheets o una base de datos.
 
+### Integración Google Sheets (programada, apagada)
+
+Ver [docs/INTEGRACION_SHEETS.md](docs/INTEGRACION_SHEETS.md). La pantalla **Simulación PEI** muestra las filas que irían al Formulario Único PEI y al sheet de Consejo de Investigación **sin escribir** hasta activar secrets.
+
 ## Páginas
 
 | Página | Función |
