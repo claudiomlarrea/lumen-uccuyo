@@ -21,6 +21,7 @@ from data.catalogs import (
     UNIDADES_ACADEMICAS,
     UNIDADES_CARGA_CS_DIRECTA,
 )
+from data.orden_cs import ordenar_temas_consejo_superior
 from data.storage import (
     actualizar_tema,
     devolver_tema_a_cd,
@@ -284,7 +285,7 @@ with tab_cs:
 
     if temas_cs:
         st.markdown("#### Temas incluidos en esta sesión")
-        for tema in temas_cs:
+        for tema in ordenar_temas_consejo_superior(temas_cs):
             origen = "Elevado desde UA" if tema.get("elevado_desde_cd") else "Carga directa"
             st.caption(f"{origen} · {tema.get('unidad_academica')}")
             _tarjeta_tema(tema)

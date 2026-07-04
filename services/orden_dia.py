@@ -13,6 +13,9 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt, RGBColor
 
+from data.investigacion import parse_puntaje
+from data.orden_cs import ordenar_temas_consejo_superior, segmentos_grupo_cs
+
 ROOT = Path(__file__).resolve().parent.parent
 LOGO = ROOT / "assets" / "logo_uccuyo_white.png"
 
@@ -28,8 +31,6 @@ def _slug(texto: str) -> str:
     limpio = re.sub(r"_+", "_", limpio).strip("_")
     return (limpio or "documento")[:50]
 
-
-from data.investigacion import parse_puntaje
 
 TIPOS_CON_DIRECTOR = frozenset(
     {
@@ -155,6 +156,54 @@ def _agregar_tema_ci(doc: Document, contador: int, tema: dict[str, Any]) -> int:
     return contador + 1
 
 
+def _agregar_tema_cs(doc: Document, contador: int, tema: dict[str, Any], *, omitir_unidad: bool) -> int:
+    head = doc.add_paragraph()
+    rh = head.add_run(f"{contador}. {tema.get('actividad', '(sin título)')}")
+    rh.bold = True
+    rh.font.size = Pt(11)
+    rh.font.color.rgb = VERDE
+
+    lines = [
+        f"Sesión: {tema.get('fecha_reunion', '—')}",
+        f"Tipo: {tema.get('tipo_actividad', '—')}",
+        f"Ámbito: {tema.get('ambito', '—')}",
+    ]
+    if not omitir_unidad:
+        lines.insert(0, f"Unidad: {tema.get('unidad_academica', '—')}")
+    if tema.get("elevado_desde_cd"):
+        lines.append(f"Elevado desde CD: {tema.get('fecha_cd', '—')}")
+    if tema.get("impacta_pei"):
+        lines.append(f"Objetivo PEI: {tema.get('objetivo_especifico', '—')}")
+    else:
+        lines.append("Impacta PEI: No")
+    if tema.get("detalle"):
+        lines.append(f"Detalle: {tema['detalle']}")
+    lines.append(f"ID: {tema.get('id', '—')}")
+
+    for line in lines:
+        p = doc.add_paragraph(line)
+        p.paragraph_format.left_indent = Cm(0.5)
+        p.paragraph_format.space_after = Pt(2)
+
+    doc.add_paragraph("")
+    return contador + 1
+
+
+def _renderizar_temas_consejo_superior(doc: Document, temas: list[dict[str, Any]]) -> None:
+    temas_ordenados = ordenar_temas_consejo_superior(temas)
+    contador = 1
+    for encabezado, items in segmentos_grupo_cs(temas_ordenados):
+        if encabezado:
+            doc.add_paragraph("")
+            h = doc.add_paragraph()
+            run_h = h.add_run(encabezado)
+            run_h.bold = True
+            run_h.font.size = Pt(12)
+            run_h.font.color.rgb = RGBColor(0, 102, 204)
+        for tema in items:
+            contador = _agregar_tema_cs(doc, contador, tema, omitir_unidad=bool(encabezado))
+
+
 def generar_orden_del_dia(
     temas: list[dict[str, Any]],
     unidad: str,
@@ -245,6 +294,8 @@ def generar_orden_del_dia(
                 run_h.font.color.rgb = RGBColor(0, 102, 204)
                 unidad_actual = unidad
             contador = _agregar_tema_ci(doc, contador, tema)
+    elif organo == "Consejo Superior":
+        _renderizar_temas_consejo_superior(doc, temas)
     else:
         for i, tema in enumerate(temas, start=1):
             head = doc.add_paragraph()
