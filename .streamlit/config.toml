@@ -6,4 +6,3 @@ toolbarMode = "minimal"
 
 [server]
 headless = true
-enableStaticServing = true
