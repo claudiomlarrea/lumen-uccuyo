@@ -17,46 +17,50 @@ def css() -> str:
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap');
 
-    html, body, [class*="css"] {{
-        font-family: 'Montserrat', sans-serif;
-        color: {TEXTO};
-    }}
-
     .stApp {{
         background: linear-gradient(180deg, {VERDE_CLARO} 0%, {FONDO} 220px, {FONDO} 100%);
+        font-family: 'Montserrat', sans-serif;
     }}
 
-    /* Sidebar */
+    /* Contenido principal — texto oscuro legible */
+    section[data-testid="stMain"] {{
+        color: {TEXTO};
+    }}
+    section[data-testid="stMain"] h1,
+    section[data-testid="stMain"] h2,
+    section[data-testid="stMain"] h3,
+    section[data-testid="stMain"] h4,
+    section[data-testid="stMain"] p,
+    section[data-testid="stMain"] li,
+    section[data-testid="stMain"] label,
+    section[data-testid="stMain"] span {{
+        color: {TEXTO};
+    }}
+    section[data-testid="stMain"] .stCaption,
+    section[data-testid="stMain"] [data-testid="stCaptionContainer"] {{
+        color: {GRIS} !important;
+    }}
+
+    /* Sidebar — solo la barra lateral en blanco */
     section[data-testid="stSidebar"] {{
         background: {VERDE_OSCURO};
     }}
-    section[data-testid="stSidebar"] * {{
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {{
         color: {BLANCO} !important;
     }}
     section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{
         background-color: rgba(255,255,255,0.12);
     }}
-    /* Logo institucional sobre fondo claro en sidebar */
-    .lumen-logo-wrap {{
-        background: {BLANCO};
-        border-radius: 14px;
-        padding: 0.65rem 0.5rem;
-        margin: 0.2rem auto 0.8rem auto;
-        text-align: center;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-        max-width: 140px;
-    }}
-    .lumen-logo-wrap img {{
-        width: 110px !important;
-        margin: 0 auto;
-    }}
-    .lumen-logo-hero {{
-        background: {BLANCO};
-        border-radius: 16px;
-        padding: 0.75rem;
-        display: inline-block;
-        box-shadow: 0 6px 18px rgba(0,77,44,0.12);
-        border: 1px solid #d5e5db;
+
+    /* Alertas legibles */
+    div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {{
+        color: inherit !important;
     }}
 
     .lumen-hero {{
@@ -74,13 +78,13 @@ def css() -> str:
     .lumen-hero h1 {{
         font-family: 'Cormorant Garamond', serif;
         font-size: 2.1rem;
-        color: {VERDE};
+        color: {VERDE} !important;
         margin: 0;
         line-height: 1.1;
     }}
     .lumen-hero p {{
         margin: 0.25rem 0 0 0;
-        color: {GRIS};
+        color: {GRIS} !important;
         font-size: 0.95rem;
     }}
     .lumen-badge {{
@@ -101,7 +105,7 @@ def css() -> str:
         padding: 0.85rem 1rem;
         border-radius: 8px;
         margin: 0.8rem 0 1.2rem 0;
-        color: {TEXTO};
+        color: {TEXTO} !important;
         font-size: 0.92rem;
     }}
     .lumen-card {{
@@ -113,47 +117,23 @@ def css() -> str:
     }}
     .lumen-card h4 {{
         margin: 0 0 0.35rem 0;
-        color: {VERDE};
+        color: {VERDE} !important;
     }}
     .lumen-meta {{
-        color: {GRIS};
+        color: {GRIS} !important;
         font-size: 0.85rem;
     }}
     .lumen-footer {{
         margin-top: 2rem;
         padding-top: 0.8rem;
         border-top: 1px solid #d5e5db;
-        color: {GRIS};
+        color: {GRIS} !important;
         font-size: 0.82rem;
         text-align: center;
-    }}
-    a.lumen-dl-link {{
-        display: block;
-        text-align: center;
-        padding: 0.75rem 1rem;
-        background: {VERDE};
-        color: {BLANCO} !important;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        margin: 0.5rem 0;
-    }}
-    a.lumen-dl-link:hover {{
-        background: {VERDE_OSCURO};
-        color: {BLANCO} !important;
-    }}
-    .lumen-dl-hint {{
-        color: {GRIS};
-        font-size: 0.82rem;
-        margin: 0.35rem 0 0.75rem 0;
-        word-break: break-all;
     }}
     div.stButton > button,
     div.stButton > button[kind="primary"],
-    div.stButton > button[data-testid="baseButton-primary"],
-    .stDownloadButton button,
-    a[data-testid="stBaseLinkButton"],
-    a[data-testid="stBaseLinkButton-secondary"] {{
+    .stDownloadButton button {{
         background: {VERDE} !important;
         color: white !important;
         border: none !important;
@@ -161,9 +141,7 @@ def css() -> str:
         font-weight: 600;
     }}
     div.stButton > button:hover,
-    .stDownloadButton button:hover,
-    a[data-testid="stBaseLinkButton"]:hover,
-    a[data-testid="stBaseLinkButton-secondary"]:hover {{
+    .stDownloadButton button:hover {{
         background: {VERDE_OSCURO} !important;
         color: white !important;
     }}

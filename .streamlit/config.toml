@@ -6,3 +6,10 @@ toolbarMode = "minimal"
 
 [server]
 headless = true
+
+[theme]
+base = "light"
+primaryColor = "#004D2C"
+backgroundColor = "#F7FAF8"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1A1A1A"

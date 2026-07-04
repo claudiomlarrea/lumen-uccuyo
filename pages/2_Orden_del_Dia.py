@@ -30,7 +30,7 @@ from data.storage import (
     load_temas,
 )
 from services.orden_dia import generar_orden_del_dia, nombre_archivo_od
-from ui import mostrar_descarga_word, preparar_descarga_word, setup_page, sidebar_brand
+from ui import guardar_word_en_sesion, mostrar_descarga_word, setup_page, sidebar_brand
 
 setup_page("Orden del día · LUMEN")
 sidebar_brand("Orden del día")
@@ -103,7 +103,7 @@ def _boton_descarga(
             None,
         )
         archivo = nombre_archivo_od(organo, ua_doc, anio_doc, fecha_doc, fecha_iso=fecha_iso)
-        preparar_descarga_word(doc_bytes, archivo, dl_key=key)
+        guardar_word_en_sesion(doc_bytes, archivo, dl_key=key)
 
     mostrar_descarga_word(key)
 
