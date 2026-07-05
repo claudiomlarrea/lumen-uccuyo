@@ -300,10 +300,10 @@ if st.button("Guardar tema en LUMEN", type="primary"):
         if procesar_adjunto_al_guardar(guardado["id"], archivo_adjunto):
             st.success(
                 f"Tema `{guardado['id']}` registrado **con documento adjunto**. "
-                "Ver Orden del día o Simulación PEI."
+                "Ver Orden del día o Impacto en tableros PEI/CI."
             )
         else:
-            st.success(f"Tema registrado en LUMEN (id `{guardado['id']}`). Ver Orden del día o Simulación PEI.")
+            st.success(f"Tema registrado en LUMEN (id `{guardado['id']}`). Ver Orden del día o Impacto en tableros PEI/CI.")
             if archivo_adjunto is None:
                 st.info(
                     "Podés cargar el documento después en **Carga de archivos** "

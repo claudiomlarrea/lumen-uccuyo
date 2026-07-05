@@ -75,9 +75,9 @@ with c3:
     st.markdown(
         """
         <div class="lumen-card">
-        <h4>3. Simulación PEI</h4>
-        <div class="lumen-meta">Vista previa de lo que impactaría en el Tablero PEI,
-        sin publicar en producción.</div>
+        <h4>3. Impacto en tableros PEI/CI</h4>
+        <div class="lumen-meta">Vista previa de lo que impactaría en el Tablero PEI
+        y en el de Investigación, sin publicar en producción.</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -89,7 +89,7 @@ st.markdown(
 1. Andá a **Cargar temas** y registrá actividades de distintas UA (podés adjuntar un documento opcional).  
 2. Si no adjuntaste al cargar, usá **Carga de archivos** (como en Consejo de Investigación).  
 3. Revisá el **Orden del día** y descargá el Word.  
-4. Marcá temas como aprobados y mirá la **Simulación PEI**.  
+4. Marcá temas como aprobados y revisá **Impacto en tableros PEI/CI**.  
 5. En **Catálogos** ves cómo crecen las opciones cargadas a mano.
 """
 )

@@ -1,4 +1,4 @@
-"""Simulación de impacto PEI e Investigación — integración programada, escritura desactivada."""
+"""Impacto en tableros PEI/CI — integración programada, escritura desactivada."""
 
 from __future__ import annotations
 
@@ -24,14 +24,14 @@ from services.integracion.publicador import (
 )
 from ui import setup_page, sidebar_brand
 
-setup_page("Simulación PEI · LUMEN")
-sidebar_brand("Simulación PEI")
+setup_page("Impacto en tableros PEI/CI · LUMEN")
+sidebar_brand("Impacto en tableros PEI/CI")
 
 modo = modo_actual()
 temas = load_temas()
 stats = resumen_publicacion(temas)
 
-st.markdown("## Simulación de publicación en tableros")
+st.markdown("## Impacto en tableros PEI / CI")
 st.markdown(
     """
     <div class="lumen-note">
