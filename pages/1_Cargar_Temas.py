@@ -113,7 +113,7 @@ if carga_cs_directa:
     )
 else:
     st.caption(
-        "Flujo habitual: Consejo Directivo de la UA → aprobación → elevación al CS → revisión SGA."
+        "Flujo habitual: Consejo Directivo de la UA → aprobación → elevación al CS → revisión de la Secretaría General Académica."
     )
 
 if es_inv:

@@ -59,7 +59,7 @@ def render_editar_tema(tema: dict[str, Any]) -> EditAccion:
 
     st.markdown("#### Modificar tema")
     if tema.get("observacion_sga"):
-        st.warning(f"**Observación de la SGA:** {tema['observacion_sga']}")
+        st.warning(f"**Observación de la Secretaría General Académica:** {tema['observacion_sga']}")
     elif tema.get("devuelto_sga_en"):
         st.info(
             "Este tema fue devuelto por la Secretaría General Académica. "

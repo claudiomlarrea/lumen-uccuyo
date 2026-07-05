@@ -230,7 +230,7 @@ ETIQUETAS_ESTADO = {
     "borrador": "Borrador",
     "en_orden_del_dia": "En orden del día (CD)",
     "aprobado_cd": "Aprobado en CD",
-    "pendiente_revision_sga": "Pendiente revisión SGA",
+    "pendiente_revision_sga": "Pendiente revisión — Secretaría General Académica",
     "en_orden_del_dia_cs": "En orden del día CS",
     "elevado_cs": "Elevado a CS (legacy)",
     "aprobado_cs": "Aprobado en CS",

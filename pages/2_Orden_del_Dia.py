@@ -1,4 +1,4 @@
-"""Orden del día, elevación a CS y bandeja SGA — prototipo LUMEN."""
+"""Orden del día, elevación a CS y revisión Secretaría General Académica — prototipo LUMEN."""
 
 from __future__ import annotations
 
@@ -76,7 +76,7 @@ def _tarjeta_tema(tema: dict) -> None:
     devolucion = ""
     if tema.get("devuelto_sga_en"):
         obs = tema.get("observacion_sga", "")
-        devolucion = "<br/><strong>Devuelto por SGA</strong>"
+        devolucion = "<br/><strong>Devuelto por Secretaría General Académica</strong>"
         if obs:
             devolucion += f" — {obs}"
     adjunto_txt = ""
@@ -171,7 +171,7 @@ tab_ua, tab_cs, tab_elevar, tab_sga = st.tabs(
         "Mi consejo de unidad",
         "Orden del día — Consejo Superior",
         "Elevar a Consejo Superior",
-        "Bandeja SGA",
+        "Secretaría General Académica",
     ]
 )
 
@@ -372,7 +372,7 @@ with tab_elevar:
     st.markdown("### Enviar temas aprobados al Consejo Superior")
     st.caption(
         "Tras el consejo de la unidad (CD, CI o CE), elevá los temas aprobados. "
-        "La **Secretaría General Académica** los revisará en la **Bandeja SGA**."
+        "La **Secretaría General Académica** los revisará antes de incorporarlos al orden del día del CS."
     )
 
     c1, c2 = st.columns(2)
@@ -423,18 +423,19 @@ with tab_elevar:
                         try:
                             elevar_tema_a_cs(tema["id"], reunion)
                             st.success(
-                                f"Tema enviado a bandeja SGA para sesión CS del "
+                                f"Tema enviado a la Secretaría General Académica para sesión CS del "
                                 f"{reunion['fecha_legible']}."
                             )
                             st.rerun()
                         except ValueError as e:
                             st.error(str(e))
 
-# ── Tab 4: Bandeja SGA ──────────────────────────────────────────────────────
+# ── Tab 4: Secretaría General Académica ─────────────────────────────────────
 with tab_sga:
     st.markdown("### Revisión — Secretaría General Académica")
     st.caption(
-        "Incorporar, devolver o aprobar temas elevados por las UA. "
+        "Espacio de trabajo de la **Secretaría General Académica (SGA)**: incorporar, devolver "
+        "o aprobar temas elevados por las UA. "
         "La descarga del Word del CS está en la pestaña **Orden del día — Consejo Superior**."
     )
 
@@ -444,7 +445,7 @@ with tab_sga:
     with c2:
         filtro_sga_est = st.selectbox(
             "Estado",
-            ["Todos", "Pendiente revisión SGA", "En orden del día CS", "Aprobado CS"],
+            ["Todos", "Pendiente de revisión", "En orden del día CS", "Aprobado CS"],
             key="est_sga",
         )
     with c3:
@@ -463,7 +464,7 @@ with tab_sga:
     ]
 
     map_est = {
-        "Pendiente revisión SGA": "pendiente_revision_sga",
+        "Pendiente de revisión": "pendiente_revision_sga",
         "En orden del día CS": "en_orden_del_dia_cs",
         "Aprobado CS": "aprobado_cs",
     }
@@ -484,10 +485,10 @@ with tab_sga:
         filtro_cs = [t for t in filtro_cs if t.get("fecha_reunion") == fecha_cs]
 
     pendientes = sum(1 for t in filtro_cs if t.get("estado") == "pendiente_revision_sga")
-    st.metric("Temas en bandeja", len(filtro_cs), delta=f"{pendientes} pendientes" if pendientes else None)
+    st.metric("Temas en revisión", len(filtro_cs), delta=f"{pendientes} pendientes" if pendientes else None)
 
     if not filtro_cs:
-        st.info("No hay temas en la bandeja con estos filtros.")
+        st.info("No hay temas para revisar con estos filtros.")
     else:
         for tema in filtro_cs:
             _tarjeta_tema(tema)
