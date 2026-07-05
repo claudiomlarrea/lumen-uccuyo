@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 import streamlit as st
 
@@ -12,7 +12,7 @@ from data.storage import modificar_tema_unidad
 from forms.adjunto import render_gestion_adjunto_tema
 from forms.investigacion import prefill_campos_investigacion, render_campos_investigacion
 
-EditAccion = Literal["saved", "cancelled"] | None
+EditAccion = Optional[Literal["saved", "cancelled"]]
 
 
 def _prefill_generico(tema: dict[str, Any], key: str) -> None:
