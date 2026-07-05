@@ -28,6 +28,7 @@ from data.catalogs import (
 )
 from data.investigacion import armar_bloque_investigacion, validar_campos_investigacion
 from data.storage import agregar_tema
+from forms.adjunto import procesar_adjunto_al_guardar, render_uploader_adjunto
 from ui import setup_page, sidebar_brand
 from forms.investigacion import render_campos_investigacion
 
@@ -241,6 +242,8 @@ estado = st.selectbox(
     key="estado",
 )
 
+archivo_adjunto = render_uploader_adjunto(key="carga")
+
 if st.button("Guardar tema en LUMEN", type="primary"):
     errores = []
     if not actividad or not str(actividad).strip():
@@ -294,4 +297,17 @@ if st.button("Guardar tema en LUMEN", type="primary"):
         if investigacion:
             record["investigacion"] = investigacion
         guardado = agregar_tema(record)
-        st.success(f"Tema registrado en LUMEN (id `{guardado['id']}`). Ver Orden del día o Simulación PEI.")
+        if procesar_adjunto_al_guardar(guardado["id"], archivo_adjunto):
+            st.success(
+                f"Tema `{guardado['id']}` registrado **con documento adjunto**. "
+                "Ver Orden del día o Simulación PEI."
+            )
+        else:
+            st.success(f"Tema registrado en LUMEN (id `{guardado['id']}`). Ver Orden del día o Simulación PEI.")
+            if archivo_adjunto is None:
+                st.info(
+                    "Podés cargar el documento después en **Carga de archivos** "
+                    "(mismo flujo que Consejo de Investigación: tema primero, archivo después)."
+                )
+                if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
+                    st.switch_page("pages/5_Carga_Archivos.py")

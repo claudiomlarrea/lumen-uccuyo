@@ -106,11 +106,14 @@ def actualizar_tema(tema_id: str, cambios: dict[str, Any]) -> dict[str, Any] | N
 
 
 def eliminar_tema(tema_id: str) -> bool:
+    from services.adjuntos import eliminar_adjunto
+
     temas = load_temas()
     nuevos = [t for t in temas if t["id"] != tema_id]
     if len(nuevos) == len(temas):
         return False
     save_temas(nuevos)
+    eliminar_adjunto(tema_id)
     return True
 
 

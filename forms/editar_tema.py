@@ -9,6 +9,7 @@ import streamlit as st
 from data.catalogs import AMBITOS, TIPOS_ACTIVIDAD, all_objetivos, objetivo_general_de, sugerir_objetivo
 from data.investigacion import armar_bloque_investigacion, validar_campos_investigacion
 from data.storage import modificar_tema_unidad
+from forms.adjunto import render_gestion_adjunto_tema
 from forms.investigacion import prefill_campos_investigacion, render_campos_investigacion
 
 EditAccion = Literal["saved", "cancelled"] | None
@@ -163,3 +164,10 @@ def render_editar_tema(tema: dict[str, Any]) -> EditAccion:
     modificar_tema_unidad(tema_id, cambios)
     _limpiar_prefill(tema_id, es_inv)
     return "saved"
+
+
+def render_adjunto_en_edicion(tema: dict[str, Any]) -> None:
+    """Gestión de adjunto fuera del form (opcional, como en CI)."""
+    st.markdown("---")
+    st.subheader("Documento adjunto")
+    render_gestion_adjunto_tema(tema)

@@ -30,7 +30,8 @@ from data.storage import (
     incorporar_tema_cs,
     load_temas,
 )
-from forms.editar_tema import render_editar_tema
+from forms.editar_tema import render_adjunto_en_edicion, render_editar_tema
+from services.adjuntos import leer_adjunto, tiene_adjunto
 from services.orden_dia import generar_orden_del_dia, nombre_archivo_od
 from ui import guardar_word_en_sesion, mostrar_descarga_word, setup_page, sidebar_brand
 
@@ -78,6 +79,10 @@ def _tarjeta_tema(tema: dict) -> None:
         devolucion = "<br/><strong>Devuelto por SGA</strong>"
         if obs:
             devolucion += f" — {obs}"
+    adjunto_txt = ""
+    if tiene_adjunto(tema.get("id", "")) or tema.get("adjunto"):
+        nombre = (tema.get("adjunto") or {}).get("nombre_original", "documento adjunto")
+        adjunto_txt = f"<br/>📎 Adjunto: {nombre}"
     st.markdown(
         f"""
         <div class="lumen-card">
@@ -85,12 +90,27 @@ def _tarjeta_tema(tema: dict) -> None:
         <div class="lumen-meta">
         <strong>{tema.get('id')}</strong> · {tema.get('unidad_academica')} · {tema.get('sede')} · {tema.get('anio')}<br/>
         Sesión: {tema.get('organo_tratamiento', '—')} · {tema.get('fecha_reunion', 'Sin fecha')}<br/>
-        Estado: {_fmt_estado(tema.get('estado', ''))}{elevacion}{devolucion}<br/>
+        Estado: {_fmt_estado(tema.get('estado', ''))}{elevacion}{devolucion}{adjunto_txt}<br/>
         PEI: {"Sí — " + tema.get('objetivo_especifico','') if tema.get('impacta_pei') else "No"}
         </div>
         </div>
         """,
         unsafe_allow_html=True,
+    )
+
+
+def _boton_descarga_adjunto(tema: dict) -> None:
+    tema_id = tema.get("id", "")
+    payload = leer_adjunto(tema_id)
+    if not payload:
+        return
+    data, meta = payload
+    st.download_button(
+        "Descargar adjunto",
+        data=data,
+        file_name=meta.get("nombre_original", "adjunto"),
+        mime=meta.get("mime") or "application/octet-stream",
+        key=f"dl_adj_card_{tema_id}",
     )
 
 
@@ -231,6 +251,8 @@ with tab_ua:
         for tema in filtro_fecha:
             _tarjeta_tema(tema)
             _alerta_devolucion_sga(tema)
+            if tiene_adjunto(tema["id"]):
+                _boton_descarga_adjunto(tema)
             b1, b2, b3, b4 = st.columns(4)
             with b1:
                 if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
@@ -262,6 +284,7 @@ with tab_ua:
                 if accion == "cancelled":
                     st.session_state.pop("lumen_edit_tema_id", None)
                     st.rerun()
+                render_adjunto_en_edicion(tema)
 
 # ── Tab 2: OD Consejo Superior (público, todas las UA) ───────────────────────
 with tab_cs:

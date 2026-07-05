@@ -86,10 +86,11 @@ with c3:
 st.markdown("### Cómo probarlo")
 st.markdown(
     """
-1. Andá a **Cargar temas** y registrá actividades de distintas UA.  
-2. Revisá el **Orden del día** y descargá el Word.  
-3. Marcá temas como aprobados y mirá la **Simulación PEI**.  
-4. En **Catálogos** ves cómo crecen las opciones cargadas a mano.
+1. Andá a **Cargar temas** y registrá actividades de distintas UA (podés adjuntar un documento opcional).  
+2. Si no adjuntaste al cargar, usá **Carga de archivos** (como en Consejo de Investigación).  
+3. Revisá el **Orden del día** y descargá el Word.  
+4. Marcá temas como aprobados y mirá la **Simulación PEI**.  
+5. En **Catálogos** ves cómo crecen las opciones cargadas a mano.
 """
 )
 

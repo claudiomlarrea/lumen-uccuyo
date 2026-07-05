@@ -6,6 +6,7 @@ venv/
 *.docx
 .streamlit/secrets.toml
 static/downloads/
+data/store/adjuntos/
 
 # Assets de trabajo del manual de marcas (solo subimos logos finales)
 assets/*
