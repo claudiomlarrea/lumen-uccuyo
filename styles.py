@@ -1,14 +1,16 @@
-"""Estilos institucionales UCCuyo para el prototipo LUMEN."""
+"""Estilos LUMEN — paleta alineada a EvaluAR (verde institucional)."""
 
-# Colores del Manual de Marcas (muestreados del emblema y aplicaciones)
-VERDE = "#004D2C"
-VERDE_OSCURO = "#003320"
-VERDE_CLARO = "#E8F2EC"
+# Misma familia cromática que EvaluAR
+VERDE = "#044A30"
+VERDE_OSCURO = "#033824"
+VERDE_CLARO = "#D5E9E2"
+VERDE_SIDEBAR = "#C6E0D6"
+BORDE = "#B8D4C8"
 ROJO = "#8B1E2D"
 ORO = "#C4922A"
-TEXTO = "#1A1A1A"
-GRIS = "#5C6B63"
-FONDO = "#F7FAF8"
+TEXTO = "#0f172a"
+GRIS = "#475569"
+FONDO = "#D5E9E2"
 BLANCO = "#FFFFFF"
 
 
@@ -17,9 +19,20 @@ def css() -> str:
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap');
 
-    .stApp {{
-        background: linear-gradient(180deg, {VERDE_CLARO} 0%, {FONDO} 220px, {FONDO} 100%);
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    section.main,
+    section.main > div,
+    .main .block-container {{
+        background-color: {FONDO} !important;
         font-family: 'Montserrat', sans-serif;
+    }}
+    [data-testid="stHeader"] {{
+        background-color: {FONDO} !important;
+    }}
+    [data-testid="stToolbar"] {{
+        background-color: transparent !important;
     }}
 
     /* Contenido principal — texto oscuro legible */
@@ -43,9 +56,10 @@ def css() -> str:
         color: {GRIS} !important;
     }}
 
-    /* Sidebar — solo la barra lateral en blanco */
-    section[data-testid="stSidebar"] {{
-        background: {VERDE_OSCURO};
+    /* Sidebar — verde menta suave (como EvaluAR) */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div {{
+        background-color: {VERDE_SIDEBAR} !important;
     }}
     section[data-testid="stSidebar"] p,
     section[data-testid="stSidebar"] label,
@@ -54,15 +68,35 @@ def css() -> str:
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {{
-        color: {BLANCO} !important;
+        color: {TEXTO} !important;
     }}
     section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{
-        background-color: rgba(255,255,255,0.12);
+        background-color: {BLANCO};
+    }}
+    /* Ítem activo del menú */
+    section[data-testid="stSidebar"] a[data-testid="stSidebarNavLink"][aria-current="page"],
+    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {{
+        background-color: rgba(4, 74, 48, 0.12) !important;
+        border-radius: 0.5rem;
     }}
 
     /* Alertas legibles */
     div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {{
         color: inherit !important;
+    }}
+    .stAlert {{
+        border-radius: 0.5rem;
+    }}
+
+    details[data-testid="stExpander"],
+    [data-testid="stDataFrame"],
+    div[data-testid="stMetric"] {{
+        background-color: {BLANCO} !important;
+        border: 1px solid {BORDE};
+        border-radius: 0.5rem;
+    }}
+    details[data-testid="stExpander"] summary {{
+        background-color: {BLANCO} !important;
     }}
 
     .lumen-hero {{
@@ -71,11 +105,11 @@ def css() -> str:
         align-items: center;
         padding: 1rem 1.25rem;
         background: {BLANCO};
-        border: 1px solid #d5e5db;
+        border: 1px solid {BORDE};
         border-left: 6px solid {VERDE};
         border-radius: 12px;
         margin-bottom: 1.2rem;
-        box-shadow: 0 8px 24px rgba(0,77,44,0.08);
+        box-shadow: 0 8px 24px rgba(4, 74, 48, 0.08);
     }}
     .lumen-hero h1 {{
         font-family: 'Cormorant Garamond', serif;
@@ -112,7 +146,7 @@ def css() -> str:
     }}
     .lumen-card {{
         background: {BLANCO};
-        border: 1px solid #d5e5db;
+        border: 1px solid {BORDE};
         border-radius: 12px;
         padding: 1rem 1.1rem;
         margin-bottom: 0.8rem;
@@ -128,12 +162,12 @@ def css() -> str:
     .lumen-footer {{
         margin-top: 2rem;
         padding-top: 0.8rem;
-        border-top: 1px solid #d5e5db;
+        border-top: 1px solid {BORDE};
         color: {GRIS} !important;
         font-size: 0.82rem;
         text-align: center;
     }}
-    /* Botones — siempre verde UCCuyo con texto blanco (normal, hover, focus) */
+    /* Botones — verde institucional EvaluAR con texto blanco */
     section[data-testid="stMain"] [data-testid="stButton"] button,
     section[data-testid="stMain"] .stButton button,
     section[data-testid="stMain"] .stDownloadButton button,
