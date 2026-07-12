@@ -42,20 +42,21 @@ st.caption("Registro único para orden del día, PEI e Investigación. Los datos
 st.info("Los datos se guardan solo en este prototipo (archivo local). No se envían a Google Sheets productivos.")
 
 st.subheader("Identificación")
-c1, c2, c3 = st.columns(3)
-with c1:
-    uas = st.multiselect(
-        "Unidad académica / administrativa *",
-        UNIDADES_ACADEMICAS,
-        max_selections=MAX_UNIDADES_ACADEMICAS,
-        key="ua",
-        help=(
-            f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades (como en Consejo de Investigación). "
-            f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quitá una con la × para cambiar."
-        ),
-    )
-    ua = "; ".join(uas) if uas else ""
-    ua_principal = uas[0] if uas else ""
+st.caption(
+    f"Podés elegir hasta **{MAX_UNIDADES_ACADEMICAS} unidades** "
+    "(como en Consejo de Investigación). Con el máximo elegido, quitá una con la × para cambiar."
+)
+uas = st.multiselect(
+    "Unidad académica / administrativa *",
+    UNIDADES_ACADEMICAS,
+    max_selections=MAX_UNIDADES_ACADEMICAS,
+    key="ua",
+    placeholder="Elegí una o más unidades…",
+)
+ua = "; ".join(uas) if uas else ""
+ua_principal = uas[0] if uas else ""
+
+c2, c3 = st.columns(2)
 with c2:
     sede = st.selectbox("Sede *", SEDES, key="sede")
 with c3:

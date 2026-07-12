@@ -206,6 +206,7 @@ with tab_ua:
         default=[],
         max_selections=MAX_UNIDADES_ACADEMICAS,
         key="ua_cd",
+        placeholder="Elegí una o más unidades…",
         help=f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. Con {MAX_UNIDADES_ACADEMICAS} elegidas, quitá una con la × para cambiar.",
     )
     if not uas_cd:

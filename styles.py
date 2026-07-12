@@ -157,64 +157,52 @@ def css() -> str:
         min-width: min(36rem, 92vw) !important;
     }}
 
-    /* Multiselect: chips en filas, sin solaparse */
-    .stMultiSelect [data-baseweb="select"] > div,
+    /* Multiselect: ancho completo, chips legibles, sin romper el control */
+    div[data-testid="stMultiSelect"] {{
+        width: 100% !important;
+    }}
     div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {{
-        min-height: 2.75rem !important;
+        min-height: 2.6rem !important;
         height: auto !important;
         max-height: none !important;
         flex-wrap: wrap !important;
         align-items: center !important;
-        align-content: flex-start !important;
-        gap: 0.35rem !important;
-        padding: 0.4rem 0.55rem !important;
+        gap: 0.3rem !important;
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
         overflow: visible !important;
     }}
-    .stMultiSelect [data-baseweb="tag"],
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"],
-    [data-baseweb="select"] [data-baseweb="tag"] {{
-        position: static !important;
-        margin: 0.1rem 0.15rem !important;
-        max-width: 100% !important;
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] {{
+        position: relative !important;
         height: auto !important;
-        min-height: 1.6rem !important;
+        max-width: min(100%, 28rem) !important;
+        margin: 0.15rem !important;
         white-space: normal !important;
-        line-height: 1.25 !important;
-        padding: 0.2rem 0.45rem !important;
+        line-height: 1.3 !important;
         background-color: {VERDE} !important;
         color: {BLANCO} !important;
-        border-radius: 0.4rem !important;
     }}
-    .stMultiSelect [data-baseweb="tag"] span,
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"] span,
-    [data-baseweb="select"] [data-baseweb="tag"] span {{
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
         white-space: normal !important;
         overflow: visible !important;
-        text-overflow: unset !important;
+        text-overflow: clip !important;
         color: {BLANCO} !important;
-        font-size: 0.82rem !important;
-        line-height: 1.25 !important;
+        font-size: 0.85rem !important;
     }}
-    /* No pintar de verde los botones internos del multiselect (×) */
-    .stMultiSelect button,
-    div[data-testid="stMultiSelect"] button,
-    [data-baseweb="select"] button,
-    [data-baseweb="tag"] button {{
+    /* Controles internos del multiselect (×, chevron): no heredar estilo de botón verde */
+    div[data-testid="stMultiSelect"] button {{
         background: transparent !important;
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        color: inherit !important;
-        min-height: auto !important;
-        height: auto !important;
-        padding: 0.1rem !important;
+        color: {TEXTO} !important;
+        min-height: 1.5rem !important;
+        height: 1.5rem !important;
+        width: auto !important;
+        padding: 0.15rem !important;
     }}
-    .stMultiSelect button *,
-    div[data-testid="stMultiSelect"] button *,
-    [data-baseweb="select"] button *,
-    [data-baseweb="tag"] button * {{
-        color: inherit !important;
-        fill: currentColor !important;
+    div[data-testid="stMultiSelect"] button svg {{
+        fill: {TEXTO} !important;
     }}
 
     .lumen-hero {{
