@@ -16,15 +16,18 @@ sidebar_brand("Carga de archivos")
 
 st.markdown("## Carga de archivos")
 st.caption(
-    "En el sistema productivo de **Consejo de Investigación**, tras guardar el tema en la planilla "
-    "se sube el documento a **Google Drive** (carpeta del acta → subcarpeta de la unidad académica). "
-    "En este prototipo LUMEN el archivo se guarda **localmente** vinculado al id del tema."
+    "En este prototipo **LUMEN** podés adjuntar el documento al tema "
+    "(PDF, Word, Excel, etc., hasta 10 MB) sin usar un Drive personal. "
+    "En Cloud el archivo vive en el servidor de la app (no en tu Google Drive); "
+    "puede borrarse si la app se redespliega. La integración con Drive institucional "
+    "queda para cuando se active como en Consejo de Investigación."
 )
 
 st.info(
-    "**Flujo CI productivo:** 1) Cargar tema → 2) Abrir carpeta del acta en Drive → "
-    "3) Entrar a la carpeta de la UA → 4) Subir archivo.\n\n"
-    "**Flujo LUMEN (prototipo):** 1) Cargar tema → 2) Subir archivo acá (opcional, ahora o después)."
+    "**Flujo LUMEN:** 1) Cargar tema → 2) Subir archivo acá (o al guardar el tema). "
+    "Después se puede descargar desde Orden del día.\n\n"
+    "**CI productivo (referencia):** el archivo va a carpetas Drive por acta/UA — "
+    "eso aún no está conectado en LUMEN."
 )
 
 st.markdown("### Referencia — carpetas Drive Consejo de Investigación (2026)")
@@ -38,17 +41,19 @@ with st.expander("Ver actas CI y enlace al flujo Drive (solo referencia)"):
 
 st.markdown("### Adjuntar documento a un tema cargado")
 
-    ua_f = st.selectbox("Unidad académica", ["Todas"] + UNIDADES_ACADEMICAS, key="adj_ua")
-c1, c2 = st.columns(2)
+ua_f = st.selectbox("Unidad académica", ["Todas"] + UNIDADES_ACADEMICAS, key="adj_ua")
+c1, c2 = st.columns([3, 1])
 with c1:
     anio_f = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="adj_anio")
 with c2:
-    solo_sin = st.checkbox("Solo temas sin archivo", value=False, key="adj_sin")
+    solo_sin = st.checkbox("Solo sin archivo", value=False, key="adj_sin")
 
 temas = load_temas()
 filtrados = [t for t in temas if t.get("anio") == anio_f]
 if ua_f != "Todas":
-    filtrados = [t for t in filtrados if t.get("unidad_academica") == ua_f]
+    from data.catalogs import tema_en_unidades
+
+    filtrados = [t for t in filtrados if tema_en_unidades(t, [ua_f])]
 if solo_sin:
     filtrados = [t for t in filtrados if not tiene_adjunto(t["id"])]
 
