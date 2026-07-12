@@ -144,19 +144,23 @@ def css() -> str:
         font-size: 0.85rem !important;
     }}
 
-    /* Inputs y tabs más legibles */
-    .stSelectbox label,
-    .stTextInput label,
-    .stTextArea label,
-    .stDateInput label,
-    .stNumberInput label,
-    .stMultiSelect label {{
-        font-size: 0.9rem !important;
-        font-weight: 600 !important;
+    /* Selectores: nombres largos legibles (UA, etc.) */
+    div[data-baseweb="select"] > div {{
+        min-height: 2.5rem;
     }}
-    div[data-testid="stTabs"] button[data-baseweb="tab"] {{
-        font-size: 0.92rem !important;
-        font-weight: 600 !important;
+    div[data-baseweb="popover"] ul[role="listbox"] li,
+    ul[role="listbox"] li,
+    div[data-baseweb="menu"] li {{
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        padding-top: 0.45rem !important;
+        padding-bottom: 0.45rem !important;
+    }}
+    div[data-baseweb="popover"] {{
+        min-width: min(36rem, 92vw) !important;
+    }}
+    div[data-baseweb="select"] span {{
+        white-space: normal !important;
     }}
 
     .lumen-hero {{

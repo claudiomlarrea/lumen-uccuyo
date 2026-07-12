@@ -38,12 +38,11 @@ with st.expander("Ver actas CI y enlace al flujo Drive (solo referencia)"):
 
 st.markdown("### Adjuntar documento a un tema cargado")
 
-c1, c2, c3 = st.columns(3)
-with c1:
     ua_f = st.selectbox("Unidad académica", ["Todas"] + UNIDADES_ACADEMICAS, key="adj_ua")
-with c2:
+c1, c2 = st.columns(2)
+with c1:
     anio_f = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="adj_anio")
-with c3:
+with c2:
     solo_sin = st.checkbox("Solo temas sin archivo", value=False, key="adj_sin")
 
 temas = load_temas()

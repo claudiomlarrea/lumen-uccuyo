@@ -183,10 +183,10 @@ with tab_ua:
         "Generá el Word para la reunión del Consejo Directivo, de Investigación o de Extensión."
     )
 
-    c1, c2, c3, c4 = st.columns(4)
+    ua_cd = st.selectbox("Unidad académica *", UNIDADES_ACADEMICAS, key="ua_cd")
+
+    c1, c2, c3 = st.columns([2, 1, 1])
     with c1:
-        ua_cd = st.selectbox("Unidad académica *", UNIDADES_ACADEMICAS, key="ua_cd")
-    with c2:
         organos_ua = sorted(ORGANOS_FECHA_LIBRE)
         organo_sug = _organo_sugerido_ua(ua_cd)
         organo_cd = st.selectbox(
@@ -195,9 +195,9 @@ with tab_ua:
             index=organos_ua.index(organo_sug) if organo_sug in organos_ua else 0,
             key="organo_cd",
         )
-    with c3:
+    with c2:
         anio_cd = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="anio_cd")
-    with c4:
+    with c3:
         sede_cd = st.selectbox("Sede", ["Todas"] + SEDES, key="sede_cd")
 
     filtro_cd = [
