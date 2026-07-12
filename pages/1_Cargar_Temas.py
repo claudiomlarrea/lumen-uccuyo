@@ -14,7 +14,6 @@ from data.calendario import (
     usa_calendario_cs,
 )
 from data.catalogs import (
-    ACTIVIDADES_EJEMPLO,
     AMBITOS,
     ANIOS,
     ETIQUETAS_ESTADO,
@@ -94,9 +93,8 @@ sidebar_brand("Cargar temas")
 if st.session_state.pop("lumen_pendiente_limpiar_tema", False):
     _limpiar_campos_tema(dismiss_success=False)
 
-# Valor legacy del selectbox (ya no existe como opción)
-if st.session_state.get("actividad_sel") == "Otra actividad (cargar a mano)":
-    st.session_state.pop("actividad_sel", None)
+# Limpiar valor legacy del selectbox de catálogo (ya eliminado)
+st.session_state.pop("actividad_sel", None)
 
 st.markdown("## Cargar temas")
 st.caption("Registro único para orden del día, PEI e Investigación. Los datos quedan solo en este prototipo.")
@@ -197,38 +195,13 @@ if es_inv:
 else:
     st.subheader("Actividad")
     tipo = st.selectbox("Tipo de actividad *", TIPOS_ACTIVIDAD, key="tipo")
-
-    ejemplos = ACTIVIDADES_EJEMPLO.get(ua_principal, [])
-    # Catálogo opcional: si la UA no tiene ejemplos, se escribe siempre a mano
-    # (antes quedaba solo «Otra actividad» y parecía elegida sola).
-    if ejemplos:
-        opciones_cat = ["— Escribir denominación a mano —"] + ejemplos
-        actividad_sel = st.selectbox(
-            "Catálogo de ejemplos (opcional)",
-            opciones_cat,
-            key="actividad_sel",
-            help="Atajo con ejemplos. Si no sirve, dejá «escribir a mano» y completá el nombre abajo.",
-        )
-        usar_catalogo = actividad_sel != "— Escribir denominación a mano —"
-    else:
-        actividad_sel = ""
-        usar_catalogo = False
-        st.caption(
-            "Esta unidad no tiene ejemplos en el catálogo demo: "
-            "escribí el nombre del tema en el campo siguiente."
-        )
-
-    if usar_catalogo:
-        actividad = actividad_sel
-        st.info(f"Denominación: **{actividad}**")
-    else:
-        actividad = st.text_input(
-            "Denominación del tema / actividad *",
-            placeholder="Ej: Convenio con municipalidad de Vicuña",
-            key="actividad_manual",
-            help="Nombre corto del tema (máx. 20 palabras). Obligatorio.",
-        )
-
+    actividad_sel = ""
+    actividad = st.text_input(
+        "Denominación del tema / actividad *",
+        placeholder="Ej: Convenio con municipalidad de Vicuña",
+        key="actividad_manual",
+        help="Nombre corto del tema (máx. 20 palabras).",
+    )
     detalle = st.text_input(
         "Detalle (opcional, máx. 20 palabras)",
         placeholder="Dato complementario — no reemplaza la denominación",
@@ -388,14 +361,7 @@ archivo_adjunto = render_uploader_adjunto(key=f"carga_{_nonce}")
 if st.button("Guardar tema en LUMEN", type="primary"):
     # Leer textos desde session_state (evita perder valor si no se pulsó Enter)
     if not es_inv:
-        ejemplos = ACTIVIDADES_EJEMPLO.get(ua_principal, [])
-        sel = str(st.session_state.get("actividad_sel") or "")
-        if ejemplos and sel and sel != "— Escribir denominación a mano —":
-            actividad = sel.strip()
-            actividad_sel = sel
-        else:
-            actividad = str(st.session_state.get("actividad_manual") or "").strip()
-            actividad_sel = ""
+        actividad = str(st.session_state.get("actividad_manual") or "").strip()
         detalle = str(st.session_state.get("detalle") or "").strip()
 
     errores = []
@@ -436,7 +402,7 @@ if st.button("Guardar tema en LUMEN", type="primary"):
             "tipo_actividad": tipo,
             "tipo_manual": "",
             "actividad": str(actividad).strip(),
-            "actividad_manual": not bool(actividad_sel),
+            "actividad_manual": True,
             "detalle": str(detalle).strip(),
             "organo_tratamiento": organo,
             "fecha_reunion": fecha_reunion,
