@@ -173,7 +173,7 @@ def segmentos_grupo_cs(
 ) -> list[tuple[str | None, list[dict[str, Any]]]]:
     """
     Agrupa temas consecutivos de la misma UA.
-    Si hay 2 o más temas de la misma UA, devuelve encabezado de grupo.
+    Siempre incluye encabezado de unidad (aunque haya un solo tema).
     """
     segmentos: list[tuple[str | None, list[dict[str, Any]]]] = []
     for tema in temas_ordenados:
@@ -186,8 +186,5 @@ def segmentos_grupo_cs(
     resultado: list[tuple[str | None, list[dict[str, Any]]]] = []
     for _encabezado, items in segmentos:
         ua = str(items[0].get("unidad_academica") or "").strip()
-        if len(items) >= 2:
-            resultado.append((titulo_encabezado_grupo_cs(ua), items))
-        else:
-            resultado.append((None, items))
+        resultado.append((titulo_encabezado_grupo_cs(ua), items))
     return resultado
