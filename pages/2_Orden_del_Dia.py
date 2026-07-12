@@ -287,16 +287,23 @@ with tab_ua:
                 _boton_descarga_adjunto(tema)
             b1, b2, b3, b4 = st.columns(4)
             with b1:
-                if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
-                    actualizar_tema(tema["id"], {"estado": "aprobado_cd"})
-                    st.rerun()
+                if tema.get("estado") != "aprobado_cd":
+                    if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
+                        actualizar_tema(tema["id"], {"estado": "aprobado_cd"})
+                        # Cerrar el formulario de edición si estaba abierto
+                        if st.session_state.get("lumen_edit_tema_id") == tema["id"]:
+                            st.session_state.pop("lumen_edit_tema_id", None)
+                        st.rerun()
             with b2:
-                if st.button("Modificar", key=f"mod_{tema['id']}"):
-                    st.session_state["lumen_edit_tema_id"] = tema["id"]
-                    st.rerun()
+                if tema.get("estado") != "aprobado_cd":
+                    if st.button("Modificar", key=f"mod_{tema['id']}"):
+                        st.session_state["lumen_edit_tema_id"] = tema["id"]
+                        st.rerun()
             with b3:
                 if st.button("Marcar borrador", key=f"bor_{tema['id']}"):
                     actualizar_tema(tema["id"], {"estado": "borrador"})
+                    if st.session_state.get("lumen_edit_tema_id") == tema["id"]:
+                        st.session_state.pop("lumen_edit_tema_id", None)
                     st.rerun()
             with b4:
                 if st.button("Eliminar", key=f"del_cd_{tema['id']}"):
@@ -307,7 +314,8 @@ with tab_ua:
             if tema.get("estado") == "aprobado_cd":
                 st.caption("→ **Elevar a CS** (pestaña *Elevar a Consejo Superior*)")
 
-            if edit_id == tema["id"]:
+            # Solo editar si no está aprobado
+            if edit_id == tema["id"] and tema.get("estado") != "aprobado_cd":
                 accion = render_editar_tema(tema)
                 if accion == "saved":
                     st.session_state.pop("lumen_edit_tema_id", None)
@@ -317,6 +325,8 @@ with tab_ua:
                     st.session_state.pop("lumen_edit_tema_id", None)
                     st.rerun()
                 render_adjunto_en_edicion(tema)
+            elif edit_id == tema["id"] and tema.get("estado") == "aprobado_cd":
+                st.session_state.pop("lumen_edit_tema_id", None)
 
 # ── Tab 2: OD Consejo Superior (público, todas las UA) ───────────────────────
 with tab_cs:
