@@ -142,24 +142,33 @@ cs_sede_reunion = ""
 cs_modalidad = ""
 
 if usa_calendario_cs(organo):
-    calendario = opciones_fecha_cs(str(anio), sede)
+    st.caption(
+        "Fechas del **Cronograma Consejo Superior 2026** (fijadas para todo el año). "
+        "Elegí la sesión sin consultar el PDF."
+    )
+    calendario = opciones_fecha_cs(str(anio), sede, incluir_todas=True)
     if not calendario:
         st.warning(f"No hay calendario de Consejo Superior para **{anio}**.")
     else:
-        incluir_todas = st.checkbox(
-            "Mostrar todas las sesiones de CS del año",
+        solo_sede = st.checkbox(
+            f"Mostrar solo sesiones de **{sede}** + virtuales",
             value=False,
-            key="cs_ver_todas",
+            key="cs_solo_sede",
         )
-        if incluir_todas:
-            calendario = opciones_fecha_cs(str(anio), sede, incluir_todas=True)
+        if solo_sede:
+            calendario = opciones_fecha_cs(str(anio), sede, incluir_todas=False)
         proxima = proxima_fecha_cs(str(anio), sede)
         idx_default = 0
         if proxima:
-            et = f"{proxima['fecha_legible']} · {proxima['etiqueta']}"
+            et = proxima["opcion"]
             if et in calendario:
                 idx_default = calendario.index(et)
-        opcion_cs = st.selectbox("Fecha del Consejo Superior *", calendario, index=idx_default, key="fecha_cs")
+        opcion_cs = st.selectbox(
+            "Fecha del Consejo Superior *",
+            calendario,
+            index=idx_default,
+            key="fecha_cs",
+        )
         reunion = fecha_cs_desde_opcion(opcion_cs, str(anio))
         if reunion:
             fecha_reunion = reunion["fecha_legible"]

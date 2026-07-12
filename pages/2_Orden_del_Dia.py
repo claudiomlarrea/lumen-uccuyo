@@ -216,6 +216,7 @@ with tab_ua:
         "Fecha de sesión *",
         ["— Elegí una fecha —"] + fechas_cd if fechas_cd else ["— Sin fechas cargadas —"],
         key="fecha_cd_sel",
+        help="Solo aparecen fechas de temas ya cargados para este consejo de unidad (CD/CI/CE).",
     )
 
     filtro_fecha = filtro_cd
@@ -305,15 +306,14 @@ with tab_cs:
         else:
             proxima = proxima_fecha_cs(anio_cs, "San Juan")
             idx_def = 0
-            if proxima:
-                et = f"{proxima['fecha_legible']} · {proxima['etiqueta']}"
-                if et in calendario_cs:
-                    idx_def = calendario_cs.index(et)
+            if proxima and proxima["opcion"] in calendario_cs:
+                idx_def = calendario_cs.index(proxima["opcion"])
             opcion_cs_pub = st.selectbox(
                 "Sesión del Consejo Superior *",
                 calendario_cs,
                 index=idx_def,
                 key="opcion_cs_pub",
+                help="Fechas del Cronograma Consejo Superior 2026 (todas las sesiones del año).",
             )
 
     reunion_pub = fecha_cs_desde_opcion(opcion_cs_pub, anio_cs) if opcion_cs_pub else None
@@ -403,16 +403,15 @@ with tab_elevar:
         else:
             proxima = proxima_fecha_cs(anio_el, sede_el)
             idx_def = 0
-            if proxima:
-                et = f"{proxima['fecha_legible']} · {proxima['etiqueta']}"
-                if et in calendario:
-                    idx_def = calendario.index(et)
+            if proxima and proxima["opcion"] in calendario:
+                idx_def = calendario.index(proxima["opcion"])
 
             opcion_cs = st.selectbox(
                 "Sesión del Consejo Superior destino *",
                 calendario,
                 index=idx_def,
                 key="opcion_cs_elevar",
+                help="Cronograma institucional CS 2026 — mismas fechas fijas para todo el año.",
             )
             reunion = fecha_cs_desde_opcion(opcion_cs, anio_el)
 
@@ -475,11 +474,12 @@ with tab_sga:
     elif origen_sga == "Carga directa CS":
         filtro_cs = [t for t in filtro_cs if not t.get("elevado_desde_cd")]
 
-    fechas_cs = sorted({t.get("fecha_reunion") for t in filtro_cs if t.get("fecha_reunion")})
+    fechas_cs_opts = ["Todas"] + [r["fecha_legible"] for r in reuniones_cs(anio_sga)]
     fecha_cs = st.selectbox(
         "Fecha sesión CS",
-        ["Todas"] + fechas_cs if fechas_cs else ["Todas"],
+        fechas_cs_opts if len(fechas_cs_opts) > 1 else ["Todas"],
         key="fecha_cs_sga",
+        help="Sesiones del Cronograma Consejo Superior 2026.",
     )
     if fecha_cs != "Todas":
         filtro_cs = [t for t in filtro_cs if t.get("fecha_reunion") == fecha_cs]

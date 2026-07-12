@@ -68,8 +68,9 @@ with t3:
 with t4:
     st.markdown("### Consejo Superior — fechas institucionales")
     st.caption(
-        "Se fijan a fin de año para el año siguiente. "
-        "Cada UA elige automáticamente entre estas fechas al cargar temas para CS."
+        "Tomadas del **Cronograma Consejo Superior 2026.pdf**. "
+        "Al cargar temas para CS o elevar desde la UA, el usuario elige de esta lista "
+        "(igual que las fechas fijas de actas en Consejo de Investigación)."
     )
     anio_cal = st.selectbox("Año del calendario", ["2026", "2027"], key="anio_cal_cs")
     data = load_calendario_cs(anio_cal)
