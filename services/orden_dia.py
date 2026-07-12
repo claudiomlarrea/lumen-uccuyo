@@ -17,9 +17,11 @@ from data.investigacion import parse_puntaje
 from data.orden_cs import ordenar_temas_consejo_superior, segmentos_grupo_cs
 
 ROOT = Path(__file__).resolve().parent.parent
-LOGO = ROOT / "assets" / "logo_uccuyo_white.png"
+LOGO = ROOT / "assets" / "logo_uccuyo.png"
+if not LOGO.exists():
+    LOGO = ROOT / "assets" / "logo_uccuyo_badge.png"
 
-VERDE = RGBColor(0x00, 0x4D, 0x2C)
+VERDE = RGBColor(0x04, 0x4A, 0x30)
 ROJO = RGBColor(0x8B, 0x1E, 0x2D)
 
 
@@ -196,6 +198,7 @@ def _renderizar_temas_consejo_superior(doc: Document, temas: list[dict[str, Any]
         if encabezado:
             doc.add_paragraph("")
             h = doc.add_paragraph()
+            h.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run_h = h.add_run(encabezado)
             run_h.bold = True
             run_h.font.size = Pt(12)
@@ -220,19 +223,21 @@ def generar_orden_del_dia(
     section.left_margin = Cm(2)
     section.right_margin = Cm(2)
 
-    table = doc.add_table(rows=1, cols=2)
-    table.autofit = True
-    cell_logo, cell_text = table.rows[0].cells
-
+    # Encabezado institucional centrado
     if LOGO.exists():
-        cell_logo.paragraphs[0].add_run().add_picture(str(LOGO), width=Cm(2.2))
+        logo_p = doc.add_paragraph()
+        logo_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        logo_p.add_run().add_picture(str(LOGO), width=Cm(2.2))
 
-    p = cell_text.paragraphs[0]
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run("Universidad Católica de Cuyo")
     run.bold = True
     run.font.size = Pt(14)
     run.font.color.rgb = VERDE
-    p2 = cell_text.add_paragraph()
+
+    p2 = doc.add_paragraph()
+    p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r2 = p2.add_run("LUMEN — Orden del Día Institucional")
     r2.font.size = Pt(11)
     r2.font.color.rgb = ROJO
@@ -267,6 +272,7 @@ def generar_orden_del_dia(
 
     doc.add_paragraph("")
     intro = doc.add_paragraph()
+    intro.alignment = WD_ALIGN_PARAGRAPH.CENTER
     if organo == "Consejo Superior":
         texto = (
             "Temas para tratamiento en Consejo Superior. "
@@ -279,20 +285,22 @@ def generar_orden_del_dia(
     doc.add_paragraph("")
 
     if not temas:
-        doc.add_paragraph("No hay temas cargados para los filtros seleccionados.")
+        vacio = doc.add_paragraph("No hay temas cargados para los filtros seleccionados.")
+        vacio.alignment = WD_ALIGN_PARAGRAPH.CENTER
     elif organo == "Consejo de Investigación":
         contador = 1
         unidad_actual = ""
         for tema in temas:
-            unidad = tema.get("unidad_academica", "—")
-            if unidad != unidad_actual:
+            unidad_tema = tema.get("unidad_academica", "—")
+            if unidad_tema != unidad_actual:
                 doc.add_paragraph("")
                 h = doc.add_paragraph()
-                run_h = h.add_run(unidad)
+                h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run_h = h.add_run(unidad_tema)
                 run_h.bold = True
                 run_h.font.size = Pt(12)
                 run_h.font.color.rgb = RGBColor(0, 102, 204)
-                unidad_actual = unidad
+                unidad_actual = unidad_tema
             contador = _agregar_tema_ci(doc, contador, tema)
     elif organo == "Consejo Superior":
         _renderizar_temas_consejo_superior(doc, temas)

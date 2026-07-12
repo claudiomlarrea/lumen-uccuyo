@@ -83,14 +83,27 @@ def _tarjeta_tema(tema: dict) -> None:
     if tiene_adjunto(tema.get("id", "")) or tema.get("adjunto"):
         nombre = (tema.get("adjunto") or {}).get("nombre_original", "documento adjunto")
         adjunto_txt = f"<br/>📎 Adjunto: {nombre}"
+
+    estado = tema.get("estado", "")
+    estado_txt = _fmt_estado(estado)
+    if estado == "aprobado_cd":
+        estado_html = f'<span class="lumen-estado-aprobado">Estado: {estado_txt}</span>'
+        card_cls = "lumen-card lumen-card-aprobado"
+    elif estado in {"aprobado_cs", "en_orden_del_dia_cs"}:
+        estado_html = f'<span class="lumen-estado-aprobado">Estado: {estado_txt}</span>'
+        card_cls = "lumen-card lumen-card-aprobado"
+    else:
+        estado_html = f"Estado: {estado_txt}"
+        card_cls = "lumen-card"
+
     st.markdown(
         f"""
-        <div class="lumen-card">
+        <div class="{card_cls}">
         <h4>{tema.get('actividad')}</h4>
         <div class="lumen-meta">
         <strong>{tema.get('id')}</strong> · {tema.get('unidad_academica')} · {tema.get('sede')} · {tema.get('anio')}<br/>
         Sesión: {tema.get('organo_tratamiento', '—')} · {tema.get('fecha_reunion', 'Sin fecha')}<br/>
-        Estado: {_fmt_estado(tema.get('estado', ''))}{elevacion}{devolucion}{adjunto_txt}<br/>
+        {estado_html}{elevacion}{devolucion}{adjunto_txt}<br/>
         PEI: {"Sí — " + tema.get('objetivo_especifico','') if tema.get('impacta_pei') else "No"}
         </div>
         </div>

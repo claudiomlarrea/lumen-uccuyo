@@ -215,6 +215,14 @@ def css() -> str:
         padding: 1rem 1.1rem;
         margin-bottom: 0.8rem;
     }}
+    .lumen-card-aprobado {{
+        border-left: 5px solid {VERDE};
+        background: #eef7f2;
+    }}
+    .lumen-estado-aprobado {{
+        color: {VERDE} !important;
+        font-weight: 700 !important;
+    }}
     .lumen-card h4 {{
         margin: 0 0 0.35rem 0;
         color: {VERDE} !important;
@@ -234,16 +242,7 @@ def css() -> str:
     }}
 
     /* Botones — verde institucional con texto blanco */
-    section[data-testid="stMain"] [data-testid="stButton"] button,
-    section[data-testid="stMain"] .stButton button,
-    section[data-testid="stMain"] .stDownloadButton button,
-    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button,
-    section[data-testid="stMain"] [data-testid="stBaseButton-primary],
-    section[data-testid="stMain"] [data-testid="stBaseButton-secondary],
-    section[data-testid="stMain"] button[kind="primary"],
-    section[data-testid="stMain"] button[kind="secondary"],
-    section[data-testid="stMain"] button[kind="primaryFormSubmit"],
-    section[data-testid="stMain"] button[kind="secondaryFormSubmit"] {{
+    section[data-testid="stMain"] button {{
         background-color: {VERDE} !important;
         background: {VERDE} !important;
         color: {BLANCO} !important;
@@ -253,32 +252,25 @@ def css() -> str:
         font-size: 0.92rem !important;
         box-shadow: none !important;
     }}
-    section[data-testid="stMain"] [data-testid="stButton"] button *,
-    section[data-testid="stMain"] .stButton button *,
-    section[data-testid="stMain"] .stDownloadButton button *,
-    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button *,
-    section[data-testid="stMain"] [data-testid="stBaseButton-primary"] *,
-    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"] * {{
+    section[data-testid="stMain"] button p,
+    section[data-testid="stMain"] button span,
+    section[data-testid="stMain"] button div,
+    section[data-testid="stMain"] button * {{
         color: {BLANCO} !important;
+        fill: {BLANCO} !important;
     }}
-    section[data-testid="stMain"] [data-testid="stButton"] button:hover,
-    section[data-testid="stMain"] [data-testid="stButton"] button:focus,
-    section[data-testid="stMain"] [data-testid="stButton"] button:active,
-    section[data-testid="stMain"] .stButton button:hover,
-    section[data-testid="stMain"] .stButton button:focus,
-    section[data-testid="stMain"] .stButton button:active,
-    section[data-testid="stMain"] .stDownloadButton button:hover,
-    section[data-testid="stMain"] .stDownloadButton button:focus,
-    section[data-testid="stMain"] .stDownloadButton button:active,
-    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:hover,
-    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:focus,
-    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:active,
-    section[data-testid="stMain"] [data-testid="stBaseButton-primary]:hover,
-    section[data-testid="stMain"] [data-testid="stBaseButton-secondary]:hover {{
+    section[data-testid="stMain"] button:hover,
+    section[data-testid="stMain"] button:focus,
+    section[data-testid="stMain"] button:active {{
         background-color: {VERDE_OSCURO} !important;
         background: {VERDE_OSCURO} !important;
         color: {BLANCO} !important;
         border-color: {VERDE_OSCURO} !important;
+    }}
+    section[data-testid="stMain"] button:hover *,
+    section[data-testid="stMain"] button:focus *,
+    section[data-testid="stMain"] button:active * {{
+        color: {BLANCO} !important;
     }}
     </style>
     """
