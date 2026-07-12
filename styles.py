@@ -19,14 +19,15 @@ def css() -> str:
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap');
 
-    .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"],
-    section.main,
-    section.main > div,
-    .main .block-container {{
-        background-color: {FONDO} !important;
+    html, body, [class*="css"] {{
         font-family: 'Montserrat', sans-serif;
+        font-size: 15px;
+        color: {TEXTO};
+    }}
+
+    .stApp,
+    [data-testid="stAppViewContainer"] {{
+        background-color: {FONDO} !important;
     }}
     [data-testid="stHeader"] {{
         background-color: {FONDO} !important;
@@ -35,30 +36,56 @@ def css() -> str:
         background-color: transparent !important;
     }}
 
-    /* Contenido principal — texto oscuro legible */
-    section[data-testid="stMain"] {{
-        color: {TEXTO};
+    /* Contenido centrado con ancho cómodo (evita texto pegado a la izquierda en layout wide) */
+    .main .block-container {{
+        max-width: 1100px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }}
-    section[data-testid="stMain"] h1,
-    section[data-testid="stMain"] h2,
-    section[data-testid="stMain"] h3,
-    section[data-testid="stMain"] h4,
+
+    section[data-testid="stMain"] h1 {{
+        color: {VERDE} !important;
+        font-size: 1.75rem !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+    }}
+    section[data-testid="stMain"] h2 {{
+        color: {TEXTO} !important;
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+        line-height: 1.3 !important;
+    }}
+    section[data-testid="stMain"] h3 {{
+        color: {TEXTO} !important;
+        font-size: 1.15rem !important;
+        font-weight: 600 !important;
+        line-height: 1.35 !important;
+    }}
+    section[data-testid="stMain"] h4 {{
+        color: {VERDE} !important;
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+    }}
     section[data-testid="stMain"] p,
     section[data-testid="stMain"] li,
     section[data-testid="stMain"] label {{
         color: {TEXTO};
-    }}
-    section[data-testid="stMain"] span:not(.stButton span):not(.stDownloadButton span):not([data-testid="stButton"] span):not([data-testid="stFormSubmitButton"] span):not([data-testid="stBaseButton-primary"] span):not([data-testid="stBaseButton-secondary"] span) {{
-        color: {TEXTO};
+        font-size: 0.95rem;
+        line-height: 1.45;
     }}
     section[data-testid="stMain"] .stCaption,
     section[data-testid="stMain"] [data-testid="stCaptionContainer"] {{
         color: {GRIS} !important;
+        font-size: 0.88rem !important;
     }}
 
     /* Sidebar — verde menta suave (como EvaluAR) */
     section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] > div {{
+    section[data-testid="stSidebar"] > div:first-child {{
         background-color: {VERDE_SIDEBAR} !important;
     }}
     section[data-testid="stSidebar"] p,
@@ -73,14 +100,13 @@ def css() -> str:
     section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {{
         background-color: {BLANCO};
     }}
-    /* Ítem activo del menú */
     section[data-testid="stSidebar"] a[data-testid="stSidebarNavLink"][aria-current="page"],
     section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {{
         background-color: rgba(4, 74, 48, 0.12) !important;
         border-radius: 0.5rem;
     }}
 
-    /* Alertas legibles */
+    /* Alertas */
     div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {{
         color: inherit !important;
     }}
@@ -88,15 +114,49 @@ def css() -> str:
         border-radius: 0.5rem;
     }}
 
-    details[data-testid="stExpander"],
-    [data-testid="stDataFrame"],
-    div[data-testid="stMetric"] {{
+    details[data-testid="stExpander"] {{
         background-color: {BLANCO} !important;
         border: 1px solid {BORDE};
         border-radius: 0.5rem;
     }}
     details[data-testid="stExpander"] summary {{
         background-color: {BLANCO} !important;
+    }}
+
+    /* Métricas compactas — evita el número gigante desalineado */
+    div[data-testid="stMetric"] {{
+        background-color: {BLANCO} !important;
+        border: 1px solid {BORDE};
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem !important;
+    }}
+    div[data-testid="stMetric"] [data-testid="stMetricLabel"] {{
+        font-size: 0.85rem !important;
+        color: {GRIS} !important;
+    }}
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: {VERDE} !important;
+        line-height: 1.2 !important;
+    }}
+    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {{
+        font-size: 0.85rem !important;
+    }}
+
+    /* Inputs y tabs más legibles */
+    .stSelectbox label,
+    .stTextInput label,
+    .stTextArea label,
+    .stDateInput label,
+    .stNumberInput label,
+    .stMultiSelect label {{
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+    }}
+    div[data-testid="stTabs"] button[data-baseweb="tab"] {{
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
     }}
 
     .lumen-hero {{
@@ -113,7 +173,7 @@ def css() -> str:
     }}
     .lumen-hero h1 {{
         font-family: 'Cormorant Garamond', serif;
-        font-size: 2.1rem;
+        font-size: 2.1rem !important;
         color: {VERDE} !important;
         margin: 0;
         line-height: 1.1;
@@ -154,6 +214,7 @@ def css() -> str:
     .lumen-card h4 {{
         margin: 0 0 0.35rem 0;
         color: {VERDE} !important;
+        font-size: 1.05rem !important;
     }}
     .lumen-meta {{
         color: {GRIS} !important;
@@ -167,13 +228,14 @@ def css() -> str:
         font-size: 0.82rem;
         text-align: center;
     }}
-    /* Botones — verde institucional EvaluAR con texto blanco */
+
+    /* Botones — verde institucional con texto blanco */
     section[data-testid="stMain"] [data-testid="stButton"] button,
     section[data-testid="stMain"] .stButton button,
     section[data-testid="stMain"] .stDownloadButton button,
     section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button,
-    section[data-testid="stMain"] [data-testid="stBaseButton-primary"],
-    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"],
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary],
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary],
     section[data-testid="stMain"] button[kind="primary"],
     section[data-testid="stMain"] button[kind="secondary"],
     section[data-testid="stMain"] button[kind="primaryFormSubmit"],
@@ -184,6 +246,7 @@ def css() -> str:
         border: 1px solid {VERDE} !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
+        font-size: 0.92rem !important;
         box-shadow: none !important;
     }}
     section[data-testid="stMain"] [data-testid="stButton"] button *,
@@ -206,8 +269,8 @@ def css() -> str:
     section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:hover,
     section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:focus,
     section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:active,
-    section[data-testid="stMain"] [data-testid="stBaseButton-primary"]:hover,
-    section[data-testid="stMain"] [data-testid="stBaseButton-secondary"]:hover {{
+    section[data-testid="stMain"] [data-testid="stBaseButton-primary]:hover,
+    section[data-testid="stMain"] [data-testid="stBaseButton-secondary]:hover {{
         background-color: {VERDE_OSCURO} !important;
         background: {VERDE_OSCURO} !important;
         color: {BLANCO} !important;
