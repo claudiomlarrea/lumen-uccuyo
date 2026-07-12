@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import pandas as pd
 import streamlit as st
 
@@ -87,12 +89,21 @@ def _tarjeta_tema(tema: dict) -> None:
 
     estado = tema.get("estado", "")
     estado_txt = _fmt_estado(estado)
-    if estado == "aprobado_cd":
+    # Temas ya aprobados pero aún marcados como devueltos (sesión vieja): no tratarlos como listos
+    if tema.get("devuelto_sga_en") and estado == "aprobado_cd":
+        estado_html = (
+            '<span class="lumen-estado-devuelto">Estado: Devuelto por SGA — pendiente de nuevo tratamiento</span>'
+        )
+        card_cls = "lumen-card"
+    elif estado == "aprobado_cd":
         estado_html = f'<span class="lumen-estado-aprobado">Estado: {estado_txt}</span>'
         card_cls = "lumen-card lumen-card-aprobado"
     elif estado in {"aprobado_cs", "en_orden_del_dia_cs"}:
         estado_html = f'<span class="lumen-estado-aprobado">Estado: {estado_txt}</span>'
         card_cls = "lumen-card lumen-card-aprobado"
+    elif tema.get("devuelto_sga_en"):
+        estado_html = f'<span class="lumen-estado-devuelto">Estado: {estado_txt} (devuelto por SGA)</span>'
+        card_cls = "lumen-card"
     else:
         estado_html = f"Estado: {estado_txt}"
         card_cls = "lumen-card"
@@ -286,17 +297,31 @@ with tab_ua:
                 _boton_descarga_adjunto(tema, key_prefix="dl_adj_ua")
             else:
                 st.caption("Sin documento adjunto — podés cargarlo en **Carga Archivos** o al modificar.")
+
+            # Devuelto por SGA: se puede modificar y volver a aprobar aunque el estado
+            # haya quedado mal en «aprobado_cd» (compatibilidad con datos previos).
+            pendiente_sga = bool(tema.get("devuelto_sga_en"))
+            listo_para_elevar = tema.get("estado") == "aprobado_cd" and not pendiente_sga
+            puede_tratar = not listo_para_elevar
+
             b1, b2, b3, b4 = st.columns(4)
             with b1:
-                if tema.get("estado") != "aprobado_cd":
+                if puede_tratar:
                     if st.button("Aprobar en consejo", key=f"apr_cd_{tema['id']}"):
-                        actualizar_tema(tema["id"], {"estado": "aprobado_cd"})
-                        # Cerrar el formulario de edición si estaba abierto
+                        actualizar_tema(
+                            tema["id"],
+                            {
+                                "estado": "aprobado_cd",
+                                "devuelto_sga_en": None,
+                                "observacion_sga": "",
+                                "aprobado_cd_en": datetime.now().isoformat(timespec="seconds"),
+                            },
+                        )
                         if st.session_state.get("lumen_edit_tema_id") == tema["id"]:
                             st.session_state.pop("lumen_edit_tema_id", None)
                         st.rerun()
             with b2:
-                if tema.get("estado") != "aprobado_cd":
+                if puede_tratar:
                     if st.button("Modificar", key=f"mod_{tema['id']}"):
                         st.session_state["lumen_edit_tema_id"] = tema["id"]
                         st.rerun()
@@ -312,11 +337,14 @@ with tab_ua:
                         st.session_state.pop("lumen_edit_tema_id", None)
                     eliminar_tema(tema["id"])
                     st.rerun()
-            if tema.get("estado") == "aprobado_cd":
+            if listo_para_elevar:
                 st.caption("→ **Elevar a CS** (pestaña *Elevar a Consejo Superior*)")
+            elif pendiente_sga:
+                st.caption(
+                    "→ Corregí el tema, **aprobá en consejo** y después elevá de nuevo al CS."
+                )
 
-            # Solo editar si no está aprobado
-            if edit_id == tema["id"] and tema.get("estado") != "aprobado_cd":
+            if edit_id == tema["id"] and puede_tratar:
                 accion = render_editar_tema(tema)
                 if accion == "saved":
                     st.session_state.pop("lumen_edit_tema_id", None)
@@ -326,7 +354,7 @@ with tab_ua:
                     st.session_state.pop("lumen_edit_tema_id", None)
                     st.rerun()
                 render_adjunto_en_edicion(tema)
-            elif edit_id == tema["id"] and tema.get("estado") == "aprobado_cd":
+            elif edit_id == tema["id"] and listo_para_elevar:
                 st.session_state.pop("lumen_edit_tema_id", None)
 
 # ── Tab 2: OD Consejo Superior (público, todas las UA) ───────────────────────
@@ -442,6 +470,7 @@ with tab_elevar:
         and t.get("organo_tratamiento") in ORGANOS_ELEVABLES_A_CS
         and t.get("estado") == "aprobado_cd"
         and not t.get("elevado_desde_cd")
+        and not t.get("devuelto_sga_en")
     ]
 
     st.metric("Temas aprobados listos para elevar", len(candidatos))

@@ -252,6 +252,10 @@ def css() -> str:
         color: {VERDE} !important;
         font-weight: 700 !important;
     }}
+    .lumen-estado-devuelto {{
+        color: #8a4b16 !important;
+        font-weight: 700 !important;
+    }}
     .lumen-card h4 {{
         margin: 0 0 0.35rem 0;
         color: {VERDE} !important;

@@ -168,6 +168,9 @@ def elevar_tema_a_cs(tema_id: str, reunion_cs: dict[str, Any]) -> dict[str, Any]
             "cs_modalidad": reunion_cs.get("modalidad", ""),
             "elevado_en": datetime.now().isoformat(timespec="seconds"),
             "actualizado_en": datetime.now().isoformat(timespec="seconds"),
+            # Limpia marca de devolución previa al re-elevar
+            "devuelto_sga_en": None,
+            "observacion_sga": "",
         }
         save_temas(temas)
         return temas[i]
@@ -186,13 +189,17 @@ def incorporar_tema_cs(tema_id: str) -> dict[str, Any] | None:
 
 
 def devolver_tema_a_cd(tema_id: str, observacion: str = "") -> dict[str, Any] | None:
-    """SGA devuelve un tema elevado a la unidad de origen."""
+    """SGA devuelve un tema elevado a la unidad de origen.
+
+    El tema vuelve a ``en_orden_del_dia`` para que el consejo de unidad
+    lo modifique, lo trate, lo apruebe y lo eleve nuevamente al CS.
+    """
     temas = load_temas()
     for i, t in enumerate(temas):
         if t["id"] != tema_id:
             continue
         cambios: dict[str, Any] = {
-            "estado": "aprobado_cd",
+            "estado": "en_orden_del_dia",
             "organo_tratamiento": t.get("organo_origen", "Consejo Directivo"),
             "fecha_reunion": t.get("fecha_cd", t.get("fecha_reunion", "")),
             "fecha_reunion_iso": t.get("fecha_cd_iso", t.get("fecha_reunion_iso", "")),
