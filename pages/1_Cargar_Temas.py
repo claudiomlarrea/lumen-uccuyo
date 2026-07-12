@@ -106,34 +106,6 @@ st.info(
     "perderse si la app se reinicia. No se envían a Google Sheets productivos."
 )
 
-# Aviso de último tema guardado (formulario ya limpio para el siguiente)
-ultimo = st.session_state.get("lumen_ultimo_tema_guardado")
-if ultimo:
-    if ultimo.get("con_adjunto"):
-        st.success(
-            f"Tema `{ultimo['id']}` registrado **con documento adjunto**. "
-            "Formulario listo para el siguiente."
-        )
-    else:
-        st.success(
-            f"Tema `{ultimo['id']}` registrado en LUMEN "
-            f"(«{ultimo.get('actividad', '')}»). "
-            "Formulario listo para el siguiente · el archivo es opcional."
-        )
-    b_ok1, b_ok2 = st.columns(2)
-    with b_ok1:
-        st.button(
-            "Cargar otro tema",
-            type="primary",
-            key="btn_cargar_otro_tema",
-            on_click=_on_cargar_otro_tema,
-            help="Limpia el aviso y deja el formulario listo (UA y fecha se conservan).",
-        )
-    with b_ok2:
-        if not ultimo.get("con_adjunto"):
-            if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
-                st.switch_page("pages/5_Carga_Archivos.py")
-
 # Errores de validación del intento anterior (arriba, bien visibles)
 _errores_prev = st.session_state.pop("lumen_errores_carga", None)
 if _errores_prev:
@@ -431,3 +403,32 @@ if st.button("Guardar tema en LUMEN", type="primary"):
         # Limpiar en el próximo run, antes de crear widgets
         st.session_state["lumen_pendiente_limpiar_tema"] = True
         st.rerun()
+
+# Aviso y acciones al final (después de Guardar)
+ultimo = st.session_state.get("lumen_ultimo_tema_guardado")
+if ultimo:
+    st.markdown("---")
+    if ultimo.get("con_adjunto"):
+        st.success(
+            f"Tema `{ultimo['id']}` registrado **con documento adjunto**. "
+            "Formulario listo para el siguiente."
+        )
+    else:
+        st.success(
+            f"Tema `{ultimo['id']}` registrado en LUMEN "
+            f"(«{ultimo.get('actividad', '')}»). "
+            "Formulario listo para el siguiente · el archivo es opcional."
+        )
+    b_ok1, b_ok2 = st.columns(2)
+    with b_ok1:
+        st.button(
+            "Cargar otro tema",
+            type="primary",
+            key="btn_cargar_otro_tema",
+            on_click=_on_cargar_otro_tema,
+            help="Limpia el aviso y deja el formulario listo (UA y fecha se conservan).",
+        )
+    with b_ok2:
+        if not ultimo.get("con_adjunto"):
+            if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
+                st.switch_page("pages/5_Carga_Archivos.py")
