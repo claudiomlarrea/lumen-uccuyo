@@ -409,16 +409,20 @@ with tab_elevar:
         "La **Secretaría General Académica** los revisará antes de incorporarlos al orden del día del CS."
     )
 
-    c1, c2 = st.columns(2)
+    c1, c2 = st.columns([4, 1])
     with c1:
-        ua_el = st.selectbox("Unidad académica origen", UNIDADES_ACADEMICAS, key="ua_el")
+        ua_el = st.selectbox(
+            "Unidad académica origen *",
+            UNIDADES_ACADEMICAS,
+            key="ua_el",
+        )
     with c2:
         anio_el = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="anio_el")
 
     candidatos = [
         t
         for t in temas
-        if t.get("unidad_academica") == ua_el
+        if tema_en_unidades(t, [ua_el])
         and t.get("anio") == anio_el
         and t.get("organo_tratamiento") in ORGANOS_ELEVABLES_A_CS
         and t.get("estado") == "aprobado_cd"
