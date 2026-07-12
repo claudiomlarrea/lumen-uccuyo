@@ -180,8 +180,8 @@ with tab_ua:
     st.markdown("### Descargar el orden del día de tu unidad")
     st.caption(
         "Elegí unidad, órgano y **fecha de sesión** (la misma que cargaste en **Cargar temas**). "
-        "Consejo Directivo, Investigación o Extensión: la fecha la define cada unidad. "
-        "El cronograma fijo del **Consejo Superior** está en la pestaña siguiente."
+        "Generá el Word para la reunión del Consejo Directivo, de Investigación o de Extensión. "
+        "Las fechas del Consejo Superior están en la pestaña **Orden del día — Consejo Superior**."
     )
 
     ua_cd = st.selectbox("Unidad académica *", UNIDADES_ACADEMICAS, key="ua_cd")
@@ -217,7 +217,7 @@ with tab_ua:
         "Fecha de sesión *",
         ["— Elegí una fecha —"] + fechas_cd if fechas_cd else ["— Sin fechas cargadas —"],
         key="fecha_cd_sel",
-        help="Fechas de temas ya cargados para este consejo de unidad (CD/CI/CE).",
+        help="Fechas de temas ya cargados para este consejo de unidad (CD/CI/CE). Podés usar cualquier fecha al cargar.",
     )
 
     filtro_fecha = filtro_cd
@@ -292,19 +292,16 @@ with tab_ua:
 with tab_cs:
     st.markdown("### Orden del día del Consejo Superior")
     st.caption(
-        "Disponible para **todas las unidades**. "
-        "Las fechas son las del **Cronograma Consejo Superior 2026**: fijadas a principio de año e inamovibles "
-        "(igual que las actas del Consejo de Investigación)."
+        "Disponible para **todas las unidades**. Las fechas son las del "
+        "**Cronograma Consejo Superior 2026** (fijadas a principio de año e inamovibles). "
+        "Elegí la sesión y descargá el Word consolidado."
     )
 
     anio_cs = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="anio_cs_pub")
 
     calendario_cs = opciones_fecha_cs(anio_cs, "San Juan", incluir_todas=True)
     if not calendario_cs:
-        st.error(
-            f"No hay cronograma CS cargado para **{anio_cs}**. "
-            "Revisá Catálogos o contactá a la Secretaría General Académica."
-        )
+        st.warning(f"No hay calendario CS cargado para {anio_cs}.")
         opcion_cs_pub = None
         reunion_pub = None
     else:
@@ -313,11 +310,11 @@ with tab_cs:
         if proxima and proxima["opcion"] in calendario_cs:
             idx_def = calendario_cs.index(proxima["opcion"])
         opcion_cs_pub = st.selectbox(
-            "Fecha de sesión del Consejo Superior *",
+            "Fecha de sesión *",
             calendario_cs,
             index=idx_def,
             key="opcion_cs_pub",
-            help="11 sesiones oficiales 2026: San Juan, San Luis, Rodeo del Medio y virtuales.",
+            help="Cronograma institucional CS 2026: San Juan, San Luis, Rodeo del Medio y virtuales.",
         )
         reunion_pub = fecha_cs_desde_opcion(opcion_cs_pub, anio_cs)
 
@@ -345,7 +342,7 @@ with tab_cs:
                 label=f"Descargar Word — Consejo Superior — {fecha_legible_cs}",
             )
         else:
-            st.warning("Elegí una sesión del cronograma CS.")
+            st.warning("Elegí una fecha de sesión del cronograma CS.")
 
     if temas_cs:
         st.markdown("#### Temas incluidos en esta sesión")
