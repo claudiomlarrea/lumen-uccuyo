@@ -146,7 +146,19 @@ def css() -> str:
         font-size: 0.85rem !important;
     }}
 
-    /* Selectores: menú desplegable con nombres largos (solo el listado, no el control) */
+    /* Selectbox: valor y opciones con nombre completo legible */
+    div[data-testid="stSelectbox"] [data-baseweb="select"] > div {{
+        min-height: 2.6rem !important;
+        height: auto !important;
+        white-space: normal !important;
+        align-items: center !important;
+    }}
+    div[data-testid="stSelectbox"] [data-baseweb="select"] span {{
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        line-height: 1.3 !important;
+    }}
     div[data-baseweb="popover"] ul[role="listbox"] li,
     ul[role="listbox"] li,
     div[data-baseweb="menu"] li {{
