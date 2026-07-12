@@ -24,7 +24,8 @@ from data.catalogs import (
     UNIDADES_CARGA_CS_DIRECTA,
     tema_en_unidades,
 )
-from data.orden_cs import ordenar_temas_consejo_superior
+from data.orden_cs import orden_ua_institucional, ordenar_temas_consejo_superior
+from data.orden_ua_cs import resolver_orden_ua, save_orden_ua_cs
 from data.storage import (
     actualizar_tema,
     devolver_tema_a_cd,
@@ -157,6 +158,7 @@ def _boton_descarga(
     *,
     key: str,
     label: str | None = None,
+    orden_ua: list[str] | None = None,
 ) -> None:
     """Generar Word y mostrar enlace de descarga (como Consejo de Investigación)."""
     if not temas_doc:
@@ -171,6 +173,7 @@ def _boton_descarga(
             anio_doc,
             fecha_reunion=fecha_doc,
             organo=organo,
+            orden_ua=orden_ua,
         )
         fecha_iso = next(
             (t.get("fecha_reunion_iso") for t in temas_doc if t.get("fecha_reunion_iso")),
@@ -391,7 +394,18 @@ with tab_cs:
     fecha_legible_cs = reunion_pub["fecha_legible"] if reunion_pub else None
 
     temas_cs = _temas_cs_sesion(anio_cs, fecha_legible_cs)
-    st.metric("Temas en el OD del Consejo Superior", len(temas_cs))
+    orden_ua_cs = (
+        resolver_orden_ua(
+            anio_cs,
+            fecha_legible_cs,
+            temas_cs,
+            orden_institucional=orden_ua_institucional(temas_cs),
+        )
+        if fecha_legible_cs
+        else None
+    )
+    temas_cs_ordenados = ordenar_temas_consejo_superior(temas_cs, orden_ua=orden_ua_cs)
+    st.metric("Temas en el OD del Consejo Superior", len(temas_cs_ordenados))
 
     with st.container(border=True):
         st.markdown("#### Generar y descargar Word — Consejo Superior")
@@ -401,8 +415,13 @@ with tab_cs:
                 f"{reunion_pub.get('etiqueta', '')} · "
                 f"{reunion_pub.get('modalidad', '').capitalize()}"
             )
+            if orden_ua_cs:
+                st.caption(
+                    "Orden de unidades (definido por SGA): "
+                    + " → ".join(orden_ua_cs)
+                )
             _boton_descarga(
-                temas_cs,
+                temas_cs_ordenados,
                 "Consejo Superior — UCCuyo",
                 reunion_pub.get("sede", "Todas"),
                 anio_cs,
@@ -410,13 +429,14 @@ with tab_cs:
                 fecha_legible_cs,
                 key="dl_cs_pub",
                 label=f"Descargar Word — Consejo Superior — {fecha_legible_cs}",
+                orden_ua=orden_ua_cs,
             )
         else:
             st.warning("Elegí una fecha de sesión del cronograma CS.")
 
-    if temas_cs:
+    if temas_cs_ordenados:
         st.markdown("#### Temas incluidos en esta sesión")
-        for tema in ordenar_temas_consejo_superior(temas_cs):
+        for tema in temas_cs_ordenados:
             origen = "Elevado desde UA" if tema.get("elevado_desde_cd") else "Carga directa"
             st.caption(f"{origen} · {tema.get('unidad_academica')}")
             _tarjeta_tema(tema)
@@ -545,8 +565,7 @@ with tab_sga:
     st.markdown("### Revisión — Secretaría General Académica")
     st.caption(
         "Espacio de trabajo de la **Secretaría General Académica (SGA)**: incorporar, devolver "
-        "o aprobar temas elevados por las UA. "
-        "Podés **descargar el documento adjunto** de cada tema (viaja con la elevación). "
+        "o eliminar temas; y **definir el orden de unidades académicas** en el OD del CS. "
         "El Word del CS está en **Orden del día — Consejo Superior**."
     )
 
@@ -599,10 +618,80 @@ with tab_sga:
     pendientes = sum(1 for t in filtro_cs if t.get("estado") == "pendiente_revision_sga")
     st.metric("Temas en revisión", len(filtro_cs), delta=f"{pendientes} pendientes" if pendientes else None)
 
+    # ── Orden de UA (solo con sesión CS concreta) ───────────────────────────
+    if fecha_cs != "Todas":
+        temas_sesion_od = [
+            t
+            for t in temas
+            if t.get("anio") == anio_sga
+            and t.get("organo_tratamiento") == "Consejo Superior"
+            and t.get("fecha_reunion") == fecha_cs
+            and t.get("estado") in {"en_orden_del_dia_cs", "aprobado_cs", "pendiente_revision_sga", "elevado_cs"}
+        ]
+        temas_en_od = [
+            t for t in temas_sesion_od if t.get("estado") in {"en_orden_del_dia_cs", "aprobado_cs"}
+        ]
+
+        with st.container(border=True):
+            st.markdown("#### Orden de unidades académicas en el OD del CS")
+            st.caption(
+                "Definí en qué orden se tratan las unidades en esta sesión. "
+                "Los temas de cada UA quedan juntos; el Word y la pestaña del CS respetan este orden."
+            )
+            if not temas_en_od and not temas_sesion_od:
+                st.info("Todavía no hay temas para esta sesión.")
+            else:
+                base = temas_en_od or temas_sesion_od
+                orden_ua = resolver_orden_ua(
+                    anio_sga,
+                    fecha_cs,
+                    base,
+                    orden_institucional=orden_ua_institucional(base),
+                )
+                cont_por_ua = {
+                    ua: sum(1 for t in base if t.get("unidad_academica") == ua) for ua in orden_ua
+                }
+
+                for i, ua in enumerate(orden_ua):
+                    c_ua, c_up, c_dn = st.columns([6, 1, 1])
+                    with c_ua:
+                        st.write(f"**{i + 1}.** {ua} · {cont_por_ua.get(ua, 0)} tema(s)")
+                    with c_up:
+                        if st.button("↑", key=f"ua_up_{fecha_cs}_{i}", disabled=i == 0):
+                            nuevo = list(orden_ua)
+                            nuevo[i - 1], nuevo[i] = nuevo[i], nuevo[i - 1]
+                            save_orden_ua_cs(anio_sga, fecha_cs, nuevo)
+                            st.rerun()
+                    with c_dn:
+                        if st.button(
+                            "↓",
+                            key=f"ua_dn_{fecha_cs}_{i}",
+                            disabled=i >= len(orden_ua) - 1,
+                        ):
+                            nuevo = list(orden_ua)
+                            nuevo[i + 1], nuevo[i] = nuevo[i], nuevo[i + 1]
+                            save_orden_ua_cs(anio_sga, fecha_cs, nuevo)
+                            st.rerun()
+
+                st.caption("Orden actual: " + " → ".join(orden_ua))
+
     if not filtro_cs:
         st.info("No hay temas para revisar con estos filtros.")
     else:
-        for tema in filtro_cs:
+        # Mostrar temas según orden de UA si hay sesión elegida
+        if fecha_cs != "Todas":
+            orden_vista = resolver_orden_ua(
+                anio_sga,
+                fecha_cs,
+                filtro_cs,
+                orden_institucional=orden_ua_institucional(filtro_cs),
+            )
+            filtro_vista = ordenar_temas_consejo_superior(filtro_cs, orden_ua=orden_vista)
+        else:
+            filtro_vista = filtro_cs
+
+        st.markdown("#### Temas")
+        for tema in filtro_vista:
             _tarjeta_tema(tema)
             origen = "Elevado desde UA" if tema.get("elevado_desde_cd") else "Carga directa"
             st.caption(f"Origen: **{origen}** · Unidad: **{tema.get('unidad_academica')}**")
@@ -619,8 +708,19 @@ with tab_sga:
                     if st.button("Aprobar CS", key=f"apcs_{tema['id']}"):
                         actualizar_tema(tema["id"], {"estado": "aprobado_cs"})
                         st.rerun()
+            with b3:
+                if tema.get("estado") in {"en_orden_del_dia_cs", "aprobado_cs"}:
+                    if st.button("Quitar del OD", key=f"quit_{tema['id']}"):
+                        # Vuelve a pendiente de revisión SGA (no borra el tema)
+                        actualizar_tema(tema["id"], {"estado": "pendiente_revision_sga"})
+                        st.rerun()
             with b4:
-                if st.button("Eliminar", key=f"del_sga_{tema['id']}"):
+                label_del = (
+                    "Eliminar del OD"
+                    if tema.get("estado") in {"en_orden_del_dia_cs", "aprobado_cs"}
+                    else "Eliminar"
+                )
+                if st.button(label_del, key=f"del_sga_{tema['id']}"):
                     eliminar_tema(tema["id"])
                     st.rerun()
 
@@ -641,7 +741,7 @@ with tab_sga:
                             st.rerun()
 
         with st.expander("Vista tabla"):
-            st.dataframe(pd.DataFrame(filtro_cs), use_container_width=True)
+            st.dataframe(pd.DataFrame(filtro_vista), use_container_width=True)
 
 st.markdown("---")
 with st.expander("Unidades con carga directa al Consejo Superior"):

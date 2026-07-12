@@ -132,9 +132,40 @@ def _clave_orden_cs(tema: dict[str, Any]) -> tuple[int, int, str, str, str]:
     )
 
 
-def ordenar_temas_consejo_superior(temas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Orden institucional del OD del Consejo Superior."""
-    return sorted(temas, key=_clave_orden_cs)
+def ordenar_temas_consejo_superior(
+    temas: Iterable[dict[str, Any]],
+    orden_ua: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Orden del OD del Consejo Superior.
+
+    Si ``orden_ua`` viene de la SGA, los temas se agrupan y ordenan según esa
+    secuencia de unidades académicas. Si no, usa el orden institucional por defecto.
+    """
+    lista = list(temas)
+    if orden_ua:
+        rank = {ua: i for i, ua in enumerate(orden_ua)}
+
+        def _clave_sga(tema: dict[str, Any]) -> tuple[int, str, str, str]:
+            ua = str(tema.get("unidad_academica") or "").strip()
+            return (
+                rank.get(ua, 10_000),
+                ua.casefold(),
+                str(tema.get("actividad") or "").casefold(),
+                str(tema.get("id") or ""),
+            )
+
+        return sorted(lista, key=_clave_sga)
+    return sorted(lista, key=_clave_orden_cs)
+
+
+def orden_ua_institucional(temas: Iterable[dict[str, Any]]) -> list[str]:
+    """Lista de UA en el orden institucional por defecto (sin personalizar)."""
+    seen: list[str] = []
+    for t in sorted(temas, key=_clave_orden_cs):
+        ua = str(t.get("unidad_academica") or "").strip()
+        if ua and ua not in seen:
+            seen.append(ua)
+    return seen
 
 
 def segmentos_grupo_cs(

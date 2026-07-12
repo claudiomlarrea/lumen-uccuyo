@@ -191,8 +191,12 @@ def _agregar_tema_cs(doc: Document, contador: int, tema: dict[str, Any], *, omit
     return contador + 1
 
 
-def _renderizar_temas_consejo_superior(doc: Document, temas: list[dict[str, Any]]) -> None:
-    temas_ordenados = ordenar_temas_consejo_superior(temas)
+def _renderizar_temas_consejo_superior(
+    doc: Document,
+    temas: list[dict[str, Any]],
+    orden_ua: list[str] | None = None,
+) -> None:
+    temas_ordenados = ordenar_temas_consejo_superior(temas, orden_ua=orden_ua)
     contador = 1
     for encabezado, items in segmentos_grupo_cs(temas_ordenados):
         if encabezado:
@@ -214,6 +218,7 @@ def generar_orden_del_dia(
     anio: str,
     fecha_reunion: str | None = None,
     organo: str = "Consejo Directivo",
+    orden_ua: list[str] | None = None,
 ) -> bytes:
     doc = Document()
 
@@ -303,7 +308,7 @@ def generar_orden_del_dia(
                 unidad_actual = unidad_tema
             contador = _agregar_tema_ci(doc, contador, tema)
     elif organo == "Consejo Superior":
-        _renderizar_temas_consejo_superior(doc, temas)
+        _renderizar_temas_consejo_superior(doc, temas, orden_ua=orden_ua)
     else:
         for i, tema in enumerate(temas, start=1):
             head = doc.add_paragraph()
