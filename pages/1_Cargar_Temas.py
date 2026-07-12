@@ -32,8 +32,67 @@ from forms.adjunto import procesar_adjunto_al_guardar, render_uploader_adjunto
 from ui import setup_page, sidebar_brand
 from forms.investigacion import render_campos_investigacion
 
+# Claves del tema a limpiar (NO tocar ua, sede, anio, organo, fecha — carga en lote).
+_KEYS_TEMA = (
+    "tipo",
+    "actividad_sel",
+    "actividad_manual",
+    "detalle",
+    "impacta_pei",
+    "requiere_cs",
+    "usar_sugerido",
+    "objetivo_manual",
+    "estado",
+)
+_INV_SUFFIXES = (
+    "tipo_ci",
+    "titulo",
+    "puntaje",
+    "descripcion",
+    "nombre_doc",
+    "dni",
+    "director",
+    "cat_dir",
+    "codirector",
+    "cat_cod",
+    "equipo",
+    "inst",
+    "catedra",
+    "alumnos",
+    "res_cd",
+    "res_cs",
+    "unidades",
+    "tipo_fin",
+    "fuente_fin",
+    "monto",
+    "acta",
+    "responsable",
+)
+
+
+def _limpiar_campos_tema(*, dismiss_success: bool = False) -> None:
+    """Debe ejecutarse ANTES de crear widgets (callback o flag al inicio)."""
+    for k in _KEYS_TEMA:
+        st.session_state.pop(k, None)
+    for suf in _INV_SUFFIXES:
+        st.session_state.pop(f"carga_{suf}", None)
+    nonce = int(st.session_state.get("lumen_carga_nonce", 0))
+    st.session_state.pop(f"carga_{nonce}_file", None)
+    st.session_state["lumen_carga_nonce"] = nonce + 1
+    if dismiss_success:
+        st.session_state.pop("lumen_ultimo_tema_guardado", None)
+
+
+def _on_cargar_otro_tema() -> None:
+    _limpiar_campos_tema(dismiss_success=True)
+
+
 setup_page("Cargar temas · LUMEN")
 sidebar_brand("Cargar temas")
+
+# Limpiar DESPUÉS de guardar, antes de dibujar el formulario (evita error de Streamlit).
+if st.session_state.pop("lumen_pendiente_limpiar_tema", False):
+    _limpiar_campos_tema(dismiss_success=False)
 
 st.markdown("## Cargar temas")
 st.caption("Registro único para orden del día, PEI e Investigación. Los datos quedan solo en este prototipo.")
@@ -44,6 +103,34 @@ st.info(
     "permanecen; los cargados en la app se conservan al cambiar de página, pero pueden "
     "perderse si la app se reinicia. No se envían a Google Sheets productivos."
 )
+
+# Aviso de último tema guardado (formulario ya limpio para el siguiente)
+ultimo = st.session_state.get("lumen_ultimo_tema_guardado")
+if ultimo:
+    if ultimo.get("con_adjunto"):
+        st.success(
+            f"Tema `{ultimo['id']}` registrado **con documento adjunto**. "
+            "Formulario listo para el siguiente."
+        )
+    else:
+        st.success(
+            f"Tema `{ultimo['id']}` registrado en LUMEN "
+            f"(«{ultimo.get('actividad', '')}»). "
+            "Formulario listo para el siguiente · el archivo es opcional."
+        )
+    b_ok1, b_ok2 = st.columns(2)
+    with b_ok1:
+        st.button(
+            "Cargar otro tema",
+            type="primary",
+            key="btn_cargar_otro_tema",
+            on_click=_on_cargar_otro_tema,
+            help="Limpia el aviso y deja el formulario listo (UA y fecha se conservan).",
+        )
+    with b_ok2:
+        if not ultimo.get("con_adjunto"):
+            if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
+                st.switch_page("pages/5_Carga_Archivos.py")
 
 st.subheader("Identificación")
 # Consejo Directivo / carga habitual: una sola UA.
@@ -267,54 +354,6 @@ estado = st.selectbox(
 _nonce = int(st.session_state.get("lumen_carga_nonce", 0))
 archivo_adjunto = render_uploader_adjunto(key=f"carga_{_nonce}")
 
-
-def _limpiar_campos_tema() -> None:
-    """Limpia actividad/detalle/PEI/adjunto; conserva UA, sede, año, órgano y fecha."""
-    keys_tema = [
-        "tipo",
-        "actividad_sel",
-        "actividad_manual",
-        "detalle",
-        "impacta_pei",
-        "requiere_cs",
-        "usar_sugerido",
-        "objetivo_manual",
-        "estado",
-        "es_investigacion",
-        "ambito",
-    ]
-    inv_suffixes = [
-        "tipo_ci",
-        "titulo",
-        "puntaje",
-        "descripcion",
-        "nombre_doc",
-        "dni",
-        "director",
-        "cat_dir",
-        "codirector",
-        "cat_cod",
-        "equipo",
-        "inst",
-        "catedra",
-        "alumnos",
-        "res_cd",
-        "res_cs",
-        "unidades",
-        "tipo_fin",
-        "fuente_fin",
-        "monto",
-        "acta",
-        "responsable",
-    ]
-    for k in keys_tema:
-        st.session_state.pop(k, None)
-    for suf in inv_suffixes:
-        st.session_state.pop(f"carga_{suf}", None)
-    st.session_state.pop("lumen_ultimo_tema_guardado", None)
-    st.session_state["lumen_carga_nonce"] = _nonce + 1
-
-
 if st.button("Guardar tema en LUMEN", type="primary"):
     errores = []
     if not ua:
@@ -376,33 +415,6 @@ if st.button("Guardar tema en LUMEN", type="primary"):
             "actividad": guardado.get("actividad", ""),
             "con_adjunto": bool(con_adjunto),
         }
+        # Limpiar en el próximo run, antes de crear widgets
+        st.session_state["lumen_pendiente_limpiar_tema"] = True
         st.rerun()
-
-# Acciones después de guardar (persisten hasta “Cargar otro tema”)
-ultimo = st.session_state.get("lumen_ultimo_tema_guardado")
-if ultimo:
-    st.markdown("---")
-    if ultimo.get("con_adjunto"):
-        st.success(
-            f"Tema `{ultimo['id']}` registrado **con documento adjunto**. "
-            "Ya está en LUMEN."
-        )
-    else:
-        st.success(
-            f"Tema `{ultimo['id']}` registrado en LUMEN "
-            f"(«{ultimo.get('actividad', '')}»). "
-            "El archivo es opcional."
-        )
-        st.caption(
-            "Si más adelante necesitás adjuntar un documento, usá **Carga de archivos**."
-        )
-
-    b1, b2 = st.columns(2)
-    with b1:
-        if st.button("Cargar otro tema", type="primary", key="btn_cargar_otro_tema"):
-            _limpiar_campos_tema()
-            st.rerun()
-    with b2:
-        if not ultimo.get("con_adjunto"):
-            if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
-                st.switch_page("pages/5_Carga_Archivos.py")
