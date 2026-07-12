@@ -1,4 +1,9 @@
-"""Almacenamiento local del prototipo LUMEN (JSON). No escribe en Google Sheets."""
+"""Almacenamiento del prototipo LUMEN (JSON + sesión Streamlit).
+
+En Streamlit Cloud el disco se reinicia en cada redespliegue: por eso los temas
+nuevos se guardan también en ``st.session_state`` para que no desaparezcan al
+cambiar de página dentro de la misma sesión.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data" / "store"
 TEMAS_PATH = DATA_DIR / "temas.json"
 CATALOGO_MANUAL_PATH = DATA_DIR / "catalogo_manual.json"
+_SESSION_TEMAS = "lumen_temas_store"
 
 
 def _ensure() -> None:
@@ -27,13 +33,32 @@ def _ensure() -> None:
         )
 
 
-def load_temas() -> list[dict[str, Any]]:
+def _leer_temas_disco() -> list[dict[str, Any]]:
     _ensure()
     return json.loads(TEMAS_PATH.read_text(encoding="utf-8"))
 
 
+def load_temas() -> list[dict[str, Any]]:
+    """Temas de la sesión actual (inicializados desde el JSON del prototipo)."""
+    try:
+        import streamlit as st
+
+        if _SESSION_TEMAS not in st.session_state:
+            st.session_state[_SESSION_TEMAS] = _leer_temas_disco()
+        return st.session_state[_SESSION_TEMAS]
+    except Exception:
+        return _leer_temas_disco()
+
+
 def save_temas(temas: list[dict[str, Any]]) -> None:
+    """Persiste en sesión (Cloud) y también en disco (local / mientras el contenedor viva)."""
     _ensure()
+    try:
+        import streamlit as st
+
+        st.session_state[_SESSION_TEMAS] = temas
+    except Exception:
+        pass
     TEMAS_PATH.write_text(json.dumps(temas, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

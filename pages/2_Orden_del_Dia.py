@@ -431,8 +431,23 @@ with tab_elevar:
 
     st.metric("Temas aprobados listos para elevar", len(candidatos))
 
+    pendientes_aprobar = [
+        t
+        for t in temas
+        if tema_en_unidades(t, [ua_el])
+        and t.get("anio") == anio_el
+        and t.get("organo_tratamiento") in ORGANOS_ELEVABLES_A_CS
+        and t.get("estado") in {"en_orden_del_dia", "borrador"}
+        and not t.get("elevado_desde_cd")
+    ]
+
     if not candidatos:
-        st.info("No hay temas aprobados pendientes de elevación para esta unidad.")
+        st.info("No hay temas **aprobados** pendientes de elevación para esta unidad.")
+        if pendientes_aprobar:
+            st.warning(
+                f"Hay **{len(pendientes_aprobar)}** tema(s) de esta UA todavía sin aprobar. "
+                "Andá a **Mi consejo de unidad** → **Aprobar en consejo**, y después volvé acá."
+            )
     else:
         sede_el = candidatos[0].get("sede", "San Juan")
         calendario = opciones_fecha_cs(anio_el, sede_el, incluir_todas=True)

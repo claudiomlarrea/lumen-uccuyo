@@ -18,7 +18,6 @@ from data.catalogs import (
     AMBITOS,
     ANIOS,
     ETIQUETAS_ESTADO,
-    MAX_UNIDADES_ACADEMICAS,
     SEDES,
     TIPOS_ACTIVIDAD,
     UNIDADES_ACADEMICAS,
@@ -39,24 +38,24 @@ sidebar_brand("Cargar temas")
 st.markdown("## Cargar temas")
 st.caption("Registro único para orden del día, PEI e Investigación. Los datos quedan solo en este prototipo.")
 
-st.info("Los datos se guardan solo en este prototipo (archivo local). No se envían a Google Sheets productivos.")
+st.info(
+    "Los datos se guardan en este prototipo durante la sesión. "
+    "En Streamlit Cloud un redespliegue reinicia el disco: los temas de demo del repositorio "
+    "permanecen; los cargados en la app se conservan al cambiar de página, pero pueden "
+    "perderse si la app se reinicia. No se envían a Google Sheets productivos."
+)
 
 st.subheader("Identificación")
-st.caption(
-    f"Podés elegir hasta **{MAX_UNIDADES_ACADEMICAS} unidades** "
-    "(como en Consejo de Investigación). Con el máximo elegido, quitá una con la × para cambiar."
-)
-uas = st.multiselect(
+# Consejo Directivo / carga habitual: una sola UA.
+# Varias UA solo en el formulario de Investigación (como en CI productivo).
+ua = st.selectbox(
     "Unidad académica / administrativa *",
     UNIDADES_ACADEMICAS,
-    max_selections=MAX_UNIDADES_ACADEMICAS,
     key="ua",
-    placeholder="Elegí una o más unidades…",
 )
-ua = "; ".join(uas) if uas else ""
-ua_principal = uas[0] if uas else ""
+ua_principal = ua
 
-c2, c3 = st.columns(2)
+c2, c3 = st.columns([3, 1])
 with c2:
     sede = st.selectbox("Sede *", SEDES, key="sede")
 with c3:
@@ -64,10 +63,10 @@ with c3:
 
 c4, c5 = st.columns(2)
 with c4:
-    idx_ambito = AMBITOS.index("Investigación") if "Secretaría Investigación" in uas else 0
+    idx_ambito = AMBITOS.index("Investigación") if ua == "Secretaría Investigación" else 0
     ambito = st.selectbox("Ámbito *", AMBITOS, index=idx_ambito, key="ambito")
 with c5:
-    if "Secretaría Investigación" in uas:
+    if ua == "Secretaría Investigación":
         st.session_state["es_investigacion"] = "Sí"
         st.selectbox(
             "¿Es tema de investigación? *",
@@ -119,7 +118,7 @@ else:
     detalle = st.text_input("Detalle (opcional, máx. 20 palabras)", key="detalle")
 
 st.subheader("Sesión del orden del día")
-carga_cs_directa = any(puede_cargar_cs_directo(u) for u in uas)
+carga_cs_directa = puede_cargar_cs_directo(ua)
 if carga_cs_directa:
     st.success(
         f"**{ua}** puede cargar temas **directamente al orden del día del Consejo Superior**."
@@ -268,8 +267,8 @@ archivo_adjunto = render_uploader_adjunto(key="carga")
 
 if st.button("Guardar tema en LUMEN", type="primary"):
     errores = []
-    if not uas:
-        errores.append(f"Seleccioná al menos una unidad académica (máx. {MAX_UNIDADES_ACADEMICAS}).")
+    if not ua:
+        errores.append("Seleccioná la unidad académica.")
     if not actividad or not str(actividad).strip():
         errores.append("Completá la actividad / denominación.")
     if not es_inv and len(str(actividad).split()) > 20:
