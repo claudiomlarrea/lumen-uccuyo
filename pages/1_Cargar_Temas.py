@@ -263,7 +263,57 @@ estado = st.selectbox(
     key="estado",
 )
 
-archivo_adjunto = render_uploader_adjunto(key="carga")
+# Contador para reiniciar el uploader al cargar otro tema
+_nonce = int(st.session_state.get("lumen_carga_nonce", 0))
+archivo_adjunto = render_uploader_adjunto(key=f"carga_{_nonce}")
+
+
+def _limpiar_campos_tema() -> None:
+    """Limpia actividad/detalle/PEI/adjunto; conserva UA, sede, año, órgano y fecha."""
+    keys_tema = [
+        "tipo",
+        "actividad_sel",
+        "actividad_manual",
+        "detalle",
+        "impacta_pei",
+        "requiere_cs",
+        "usar_sugerido",
+        "objetivo_manual",
+        "estado",
+        "es_investigacion",
+        "ambito",
+    ]
+    inv_suffixes = [
+        "tipo_ci",
+        "titulo",
+        "puntaje",
+        "descripcion",
+        "nombre_doc",
+        "dni",
+        "director",
+        "cat_dir",
+        "codirector",
+        "cat_cod",
+        "equipo",
+        "inst",
+        "catedra",
+        "alumnos",
+        "res_cd",
+        "res_cs",
+        "unidades",
+        "tipo_fin",
+        "fuente_fin",
+        "monto",
+        "acta",
+        "responsable",
+    ]
+    for k in keys_tema:
+        st.session_state.pop(k, None)
+    for suf in inv_suffixes:
+        st.session_state.pop(f"carga_{suf}", None)
+    st.session_state.pop("lumen_ultimo_tema_guardado", None)
+    st.session_state["lumen_carga_nonce"] = _nonce + 1
+
 
 if st.button("Guardar tema en LUMEN", type="primary"):
     errores = []
@@ -320,17 +370,39 @@ if st.button("Guardar tema en LUMEN", type="primary"):
         if investigacion:
             record["investigacion"] = investigacion
         guardado = agregar_tema(record)
-        if procesar_adjunto_al_guardar(guardado["id"], archivo_adjunto):
-            st.success(
-                f"Tema `{guardado['id']}` registrado **con documento adjunto**. "
-                "Ver Orden del día o Impacto en tableros PEI/CI."
-            )
-        else:
-            st.success(f"Tema registrado en LUMEN (id `{guardado['id']}`). Ver Orden del día o Impacto en tableros PEI/CI.")
-            if archivo_adjunto is None:
-                st.info(
-                    "Podés cargar el documento después en **Carga de archivos** "
-                    "(mismo flujo que Consejo de Investigación: tema primero, archivo después)."
-                )
-                if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
-                    st.switch_page("pages/5_Carga_Archivos.py")
+        con_adjunto = procesar_adjunto_al_guardar(guardado["id"], archivo_adjunto)
+        st.session_state["lumen_ultimo_tema_guardado"] = {
+            "id": guardado["id"],
+            "actividad": guardado.get("actividad", ""),
+            "con_adjunto": bool(con_adjunto),
+        }
+        st.rerun()
+
+# Acciones después de guardar (persisten hasta “Cargar otro tema”)
+ultimo = st.session_state.get("lumen_ultimo_tema_guardado")
+if ultimo:
+    st.markdown("---")
+    if ultimo.get("con_adjunto"):
+        st.success(
+            f"Tema `{ultimo['id']}` registrado **con documento adjunto**. "
+            "Ya está en LUMEN."
+        )
+    else:
+        st.success(
+            f"Tema `{ultimo['id']}` registrado en LUMEN "
+            f"(«{ultimo.get('actividad', '')}»). "
+            "El archivo es opcional."
+        )
+        st.caption(
+            "Si más adelante necesitás adjuntar un documento, usá **Carga de archivos**."
+        )
+
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("Cargar otro tema", type="primary", key="btn_cargar_otro_tema"):
+            _limpiar_campos_tema()
+            st.rerun()
+    with b2:
+        if not ultimo.get("con_adjunto"):
+            if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
+                st.switch_page("pages/5_Carga_Archivos.py")
