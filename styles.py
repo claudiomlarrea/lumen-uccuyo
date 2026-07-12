@@ -144,10 +144,7 @@ def css() -> str:
         font-size: 0.85rem !important;
     }}
 
-    /* Selectores: nombres largos legibles (UA, etc.) */
-    div[data-baseweb="select"] > div {{
-        min-height: 2.5rem;
-    }}
+    /* Selectores: menú desplegable con nombres largos */
     div[data-baseweb="popover"] ul[role="listbox"] li,
     ul[role="listbox"] li,
     div[data-baseweb="menu"] li {{
@@ -159,8 +156,65 @@ def css() -> str:
     div[data-baseweb="popover"] {{
         min-width: min(36rem, 92vw) !important;
     }}
-    div[data-baseweb="select"] span {{
+
+    /* Multiselect: chips en filas, sin solaparse */
+    .stMultiSelect [data-baseweb="select"] > div,
+    div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {{
+        min-height: 2.75rem !important;
+        height: auto !important;
+        max-height: none !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        align-content: flex-start !important;
+        gap: 0.35rem !important;
+        padding: 0.4rem 0.55rem !important;
+        overflow: visible !important;
+    }}
+    .stMultiSelect [data-baseweb="tag"],
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"],
+    [data-baseweb="select"] [data-baseweb="tag"] {{
+        position: static !important;
+        margin: 0.1rem 0.15rem !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 1.6rem !important;
         white-space: normal !important;
+        line-height: 1.25 !important;
+        padding: 0.2rem 0.45rem !important;
+        background-color: {VERDE} !important;
+        color: {BLANCO} !important;
+        border-radius: 0.4rem !important;
+    }}
+    .stMultiSelect [data-baseweb="tag"] span,
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] span,
+    [data-baseweb="select"] [data-baseweb="tag"] span {{
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        color: {BLANCO} !important;
+        font-size: 0.82rem !important;
+        line-height: 1.25 !important;
+    }}
+    /* No pintar de verde los botones internos del multiselect (×) */
+    .stMultiSelect button,
+    div[data-testid="stMultiSelect"] button,
+    [data-baseweb="select"] button,
+    [data-baseweb="tag"] button {{
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: inherit !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 0.1rem !important;
+    }}
+    .stMultiSelect button *,
+    div[data-testid="stMultiSelect"] button *,
+    [data-baseweb="select"] button *,
+    [data-baseweb="tag"] button * {{
+        color: inherit !important;
+        fill: currentColor !important;
     }}
 
     .lumen-hero {{
@@ -241,8 +295,19 @@ def css() -> str:
         text-align: center;
     }}
 
-    /* Botones — verde institucional con texto blanco */
-    section[data-testid="stMain"] button {{
+    /* Botones de acción — verde institucional con texto blanco
+       (excluye controles internos de multiselect / select) */
+    section[data-testid="stMain"] [data-testid="stButton"] button,
+    section[data-testid="stMain"] .stDownloadButton button,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button,
+    section[data-testid="stMain"] button[kind="primary"],
+    section[data-testid="stMain"] button[kind="secondary"],
+    section[data-testid="stMain"] button[kind="primaryFormSubmit"],
+    section[data-testid="stMain"] button[kind="secondaryFormSubmit"],
+    section[data-testid="stMain"] button[data-testid="baseButton-primary"],
+    section[data-testid="stMain"] button[data-testid="baseButton-secondary"],
+    section[data-testid="stMain"] button[data-testid="baseButton-primaryFormSubmit"],
+    section[data-testid="stMain"] button[data-testid="baseButton-secondaryFormSubmit"] {{
         background-color: {VERDE} !important;
         background: {VERDE} !important;
         color: {BLANCO} !important;
@@ -252,25 +317,35 @@ def css() -> str:
         font-size: 0.92rem !important;
         box-shadow: none !important;
     }}
-    section[data-testid="stMain"] button p,
-    section[data-testid="stMain"] button span,
-    section[data-testid="stMain"] button div,
-    section[data-testid="stMain"] button * {{
+    section[data-testid="stMain"] [data-testid="stButton"] button *,
+    section[data-testid="stMain"] .stDownloadButton button *,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button *,
+    section[data-testid="stMain"] button[kind="primary"] *,
+    section[data-testid="stMain"] button[kind="secondary"] *,
+    section[data-testid="stMain"] button[kind="primaryFormSubmit"] *,
+    section[data-testid="stMain"] button[kind="secondaryFormSubmit"] *,
+    section[data-testid="stMain"] button[data-testid="baseButton-primary"] *,
+    section[data-testid="stMain"] button[data-testid="baseButton-secondary"] *,
+    section[data-testid="stMain"] button[data-testid="baseButton-primaryFormSubmit"] *,
+    section[data-testid="stMain"] button[data-testid="baseButton-secondaryFormSubmit"] * {{
         color: {BLANCO} !important;
         fill: {BLANCO} !important;
     }}
-    section[data-testid="stMain"] button:hover,
-    section[data-testid="stMain"] button:focus,
-    section[data-testid="stMain"] button:active {{
+    section[data-testid="stMain"] [data-testid="stButton"] button:hover,
+    section[data-testid="stMain"] [data-testid="stButton"] button:focus,
+    section[data-testid="stMain"] [data-testid="stButton"] button:active,
+    section[data-testid="stMain"] .stDownloadButton button:hover,
+    section[data-testid="stMain"] .stDownloadButton button:focus,
+    section[data-testid="stMain"] .stDownloadButton button:active,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:hover,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:focus,
+    section[data-testid="stMain"] [data-testid="stFormSubmitButton"] button:active,
+    section[data-testid="stMain"] button[data-testid="baseButton-primary"]:hover,
+    section[data-testid="stMain"] button[data-testid="baseButton-secondary"]:hover {{
         background-color: {VERDE_OSCURO} !important;
         background: {VERDE_OSCURO} !important;
         color: {BLANCO} !important;
         border-color: {VERDE_OSCURO} !important;
-    }}
-    section[data-testid="stMain"] button:hover *,
-    section[data-testid="stMain"] button:focus *,
-    section[data-testid="stMain"] button:active * {{
-        color: {BLANCO} !important;
     }}
     </style>
     """
