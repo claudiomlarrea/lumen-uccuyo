@@ -19,10 +19,12 @@ def css() -> str:
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap');
 
-    html, body, [class*="css"] {{
+    html, body, .stApp {{
         font-family: 'Montserrat', sans-serif;
-        font-size: 15px;
         color: {TEXTO};
+    }}
+    .stApp {{
+        font-size: 15px;
     }}
 
     .stApp,
@@ -144,7 +146,7 @@ def css() -> str:
         font-size: 0.85rem !important;
     }}
 
-    /* Selectores: menú desplegable con nombres largos */
+    /* Selectores: menú desplegable con nombres largos (solo el listado, no el control) */
     div[data-baseweb="popover"] ul[role="listbox"] li,
     ul[role="listbox"] li,
     div[data-baseweb="menu"] li {{
@@ -157,51 +159,24 @@ def css() -> str:
         min-width: min(36rem, 92vw) !important;
     }}
 
-    /* Multiselect: ancho completo, chips legibles, sin romper el control */
-    div[data-testid="stMultiSelect"] {{
-        width: 100% !important;
-    }}
-    div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {{
-        min-height: 2.6rem !important;
-        height: auto !important;
-        max-height: none !important;
-        flex-wrap: wrap !important;
-        align-items: center !important;
-        gap: 0.3rem !important;
-        padding-top: 0.35rem !important;
-        padding-bottom: 0.35rem !important;
-        overflow: visible !important;
-    }}
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"] {{
-        position: relative !important;
-        height: auto !important;
-        max-width: min(100%, 28rem) !important;
-        margin: 0.15rem !important;
-        white-space: normal !important;
-        line-height: 1.3 !important;
-        background-color: {VERDE} !important;
-        color: {BLANCO} !important;
-    }}
-    div[data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        color: {BLANCO} !important;
-        font-size: 0.85rem !important;
-    }}
-    /* Controles internos del multiselect (×, chevron): no heredar estilo de botón verde */
-    div[data-testid="stMultiSelect"] button {{
+    /* Multiselect: no tocar altura/padding del control (rompe el placeholder).
+       Solo evitar que el CSS de botones verdes pinte la × y el chevron. */
+    div[data-testid="stMultiSelect"] button,
+    div[data-testid="stMultiSelect"] [data-baseweb="select"] button,
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] button {{
         background: transparent !important;
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
         color: {TEXTO} !important;
-        min-height: 1.5rem !important;
-        height: 1.5rem !important;
-        width: auto !important;
-        padding: 0.15rem !important;
+        min-height: unset !important;
+        height: unset !important;
+        width: unset !important;
+        padding: 0 !important;
+        font-size: inherit !important;
     }}
-    div[data-testid="stMultiSelect"] button svg {{
+    div[data-testid="stMultiSelect"] button svg,
+    div[data-testid="stMultiSelect"] [data-baseweb="tag"] svg {{
         fill: {TEXTO} !important;
     }}
 
