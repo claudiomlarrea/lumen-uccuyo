@@ -21,10 +21,10 @@ from services.adjuntos import (
 
 def _caption_ci() -> None:
     st.caption(
-        "Como en el **Consejo de Investigación**: el documento (resolución, informe, proyecto, etc.) "
-        "es **opcional** al cargar el tema. Podés subirlo ahora o después en **Carga de archivos**."
+        "Documento opcional (resolución, informe, proyecto, etc.). "
+        "Si lo cargás acá o en **Carga Archivos**, **viaja con el tema** al elevar a Consejo Superior: "
+        "los miembros del CS y la SGA lo descargan sin volver a subirlo."
     )
-
 
 def render_uploader_adjunto(*, key: str = "adj") -> Any:
     """Uploader opcional para el formulario de carga de temas."""

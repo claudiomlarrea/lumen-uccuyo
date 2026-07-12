@@ -113,7 +113,7 @@ def _tarjeta_tema(tema: dict) -> None:
     )
 
 
-def _boton_descarga_adjunto(tema: dict) -> None:
+def _boton_descarga_adjunto(tema: dict, *, key_prefix: str = "dl_adj") -> None:
     tema_id = tema.get("id", "")
     payload = leer_adjunto(tema_id)
     if not payload:
@@ -124,8 +124,16 @@ def _boton_descarga_adjunto(tema: dict) -> None:
         data=data,
         file_name=meta.get("nombre_original", "adjunto"),
         mime=meta.get("mime") or "application/octet-stream",
-        key=f"dl_adj_card_{tema_id}",
+        key=f"{key_prefix}_{tema_id}",
     )
+
+
+def _acciones_adjunto(tema: dict, *, key_prefix: str = "dl_adj") -> None:
+    """Muestra descarga del adjunto (viaja con el tema al elevar a CS)."""
+    if tiene_adjunto(tema.get("id", "")):
+        _boton_descarga_adjunto(tema, key_prefix=key_prefix)
+    else:
+        st.caption("Sin documento adjunto")
 
 
 def _boton_descarga(
@@ -275,7 +283,9 @@ with tab_ua:
             _tarjeta_tema(tema)
             _alerta_devolucion_sga(tema)
             if tiene_adjunto(tema["id"]):
-                _boton_descarga_adjunto(tema)
+                _boton_descarga_adjunto(tema, key_prefix="dl_adj_ua")
+            else:
+                st.caption("Sin documento adjunto — podés cargarlo en **Carga Archivos** o al modificar.")
             b1, b2, b3, b4 = st.columns(4)
             with b1:
                 if tema.get("estado") != "aprobado_cd":
@@ -325,7 +335,8 @@ with tab_cs:
     st.caption(
         "Disponible para **todas las unidades**. Las fechas son las del "
         "**Cronograma Consejo Superior 2026** (fijadas a principio de año e inamovibles). "
-        "Elegí la sesión y descargá el Word consolidado."
+        "Elegí la sesión, descargá el Word consolidado y los **documentos adjuntos** de cada tema "
+        "(los elevados desde la UA llegan con su archivo)."
     )
 
     anio_cs = st.selectbox("Año", ANIOS, index=ANIOS.index("2026"), key="anio_cs_pub")
@@ -381,6 +392,7 @@ with tab_cs:
             origen = "Elevado desde UA" if tema.get("elevado_desde_cd") else "Carga directa"
             st.caption(f"{origen} · {tema.get('unidad_academica')}")
             _tarjeta_tema(tema)
+            _acciones_adjunto(tema, key_prefix="dl_adj_cs")
     elif reunion_pub:
         st.info(
             "Todavía no hay temas cargados para esta sesión del CS. "
@@ -407,7 +419,9 @@ with tab_elevar:
     st.markdown("### Enviar temas aprobados al Consejo Superior")
     st.caption(
         "Tras el consejo de la unidad (CD, CI o CE), elevá los temas aprobados. "
-        "La **Secretaría General Académica** los revisará antes de incorporarlos al orden del día del CS."
+        "El **documento adjunto viaja con el tema** (mismo id): no hace falta volver a subirlo. "
+        "La **Secretaría General Académica** y los miembros del CS podrán descargarlo "
+        "desde la bandeja SGA y el orden del día del CS."
     )
 
     c1, c2 = st.columns([4, 1])
@@ -471,14 +485,28 @@ with tab_elevar:
 
             for tema in candidatos:
                 _tarjeta_tema(tema)
+                _acciones_adjunto(tema, key_prefix="dl_adj_elv")
+                if not tiene_adjunto(tema["id"]):
+                    st.warning(
+                        "Este tema no tiene documento adjunto. "
+                        "Podés elevarlo igual, pero conviene cargarlo antes en **Carga Archivos** "
+                        "para que el CS pueda leerlo."
+                    )
                 if st.button(f"Elevar a CS — {tema['actividad'][:40]}", key=f"elv_{tema['id']}"):
                     if reunion:
                         try:
                             elevar_tema_a_cs(tema["id"], reunion)
-                            st.success(
-                                f"Tema enviado a la Secretaría General Académica para sesión CS del "
-                                f"{reunion['fecha_legible']}."
-                            )
+                            adj_ok = tiene_adjunto(tema["id"])
+                            if adj_ok:
+                                st.success(
+                                    f"Tema y archivo enviados a la Secretaría General Académica "
+                                    f"para sesión CS del {reunion['fecha_legible']}."
+                                )
+                            else:
+                                st.success(
+                                    f"Tema enviado a la Secretaría General Académica "
+                                    f"para sesión CS del {reunion['fecha_legible']}."
+                                )
                             st.rerun()
                         except ValueError as e:
                             st.error(str(e))
@@ -489,7 +517,8 @@ with tab_sga:
     st.caption(
         "Espacio de trabajo de la **Secretaría General Académica (SGA)**: incorporar, devolver "
         "o aprobar temas elevados por las UA. "
-        "La descarga del Word del CS está en la pestaña **Orden del día — Consejo Superior**."
+        "Podés **descargar el documento adjunto** de cada tema (viaja con la elevación). "
+        "El Word del CS está en **Orden del día — Consejo Superior**."
     )
 
     c1, c2, c3 = st.columns(3)
@@ -548,6 +577,7 @@ with tab_sga:
             _tarjeta_tema(tema)
             origen = "Elevado desde UA" if tema.get("elevado_desde_cd") else "Carga directa"
             st.caption(f"Origen: **{origen}** · Unidad: **{tema.get('unidad_academica')}**")
+            _acciones_adjunto(tema, key_prefix="dl_adj_sga")
 
             b1, b2, b3, b4 = st.columns(4)
             with b1:

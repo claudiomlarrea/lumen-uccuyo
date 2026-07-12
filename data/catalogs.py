@@ -26,7 +26,6 @@ UNIDADES_ACADEMICAS = [
     "Vicerrector/a",
     "Vicerrector/a de Formación",
     "Vicerrector/a de Sede",
-    "Consejo Superior",
     "Secretaría Académica",
     "Secretaría de Extensión",
     "Secretaría Investigación",

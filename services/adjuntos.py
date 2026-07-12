@@ -1,4 +1,8 @@
-"""Adjuntos opcionales por tema — prototipo local (futuro: carpetas Google Drive por acta/UA)."""
+"""Adjuntos por tema — viajan con el tema al elevar a CS (mismo id).
+
+En Cloud el disco es efímero: además del archivo en disco se guarda una copia
+en ``st.session_state`` para que el adjunto no desaparezca al cambiar de página.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +14,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 ADJUNTOS_DIR = ROOT / "data" / "store" / "adjuntos"
+_SESSION_ADJ = "lumen_adjuntos_store"
 
 EXTENSIONES_PERMITIDAS = (
     "pdf",
@@ -38,6 +43,17 @@ def _meta_path(tema_id: str) -> Path:
     return _dir_tema(tema_id) / "meta.json"
 
 
+def _session_store() -> dict[str, Any]:
+    try:
+        import streamlit as st
+
+        if _SESSION_ADJ not in st.session_state:
+            st.session_state[_SESSION_ADJ] = {}
+        return st.session_state[_SESSION_ADJ]
+    except Exception:
+        return {}
+
+
 def validar_archivo(uploaded_file: Any) -> list[str]:
     errores: list[str] = []
     if uploaded_file is None:
@@ -55,6 +71,9 @@ def validar_archivo(uploaded_file: Any) -> list[str]:
 
 
 def tiene_adjunto(tema_id: str) -> bool:
+    store = _session_store()
+    if tema_id in store and store[tema_id].get("bytes"):
+        return True
     meta = _meta_path(tema_id)
     if not meta.exists():
         return False
@@ -64,6 +83,9 @@ def tiene_adjunto(tema_id: str) -> bool:
 
 
 def meta_adjunto(tema_id: str) -> dict[str, Any] | None:
+    store = _session_store()
+    if tema_id in store and store[tema_id].get("meta"):
+        return dict(store[tema_id]["meta"])
     meta = _meta_path(tema_id)
     if not meta.exists():
         return None
@@ -79,46 +101,66 @@ def guardar_adjunto(tema_id: str, uploaded_file: Any) -> dict[str, Any]:
     nombre_original = str(uploaded_file.name)
     ext = nombre_original.rsplit(".", 1)[-1].lower()
     nombre_guardado = f"adjunto.{ext}"
+    contenido = uploaded_file.getvalue()
 
     carpeta = _dir_tema(tema_id)
     carpeta.mkdir(parents=True, exist_ok=True)
 
-    # Limpiar archivos previos
     for f in carpeta.iterdir():
         if f.is_file():
             f.unlink()
 
     destino = carpeta / nombre_guardado
-    destino.write_bytes(uploaded_file.getvalue())
+    destino.write_bytes(contenido)
 
     meta: dict[str, Any] = {
         "nombre_original": nombre_original,
         "nombre_guardado": nombre_guardado,
         "mime": str(getattr(uploaded_file, "type", "") or ""),
-        "tamano_bytes": destino.stat().st_size,
+        "tamano_bytes": len(contenido),
         "cargado_en": datetime.now().isoformat(timespec="seconds"),
         "opcional": True,
+        "viaja_con_tema": True,
     }
     _meta_path(tema_id).write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    store = _session_store()
+    store[tema_id] = {"meta": meta, "bytes": contenido}
     return meta
 
 
 def leer_adjunto(tema_id: str) -> tuple[bytes, dict[str, Any]] | None:
+    store = _session_store()
+    if tema_id in store and store[tema_id].get("bytes"):
+        return store[tema_id]["bytes"], dict(store[tema_id]["meta"])
+
     meta = meta_adjunto(tema_id)
     if not meta:
         return None
     path = _dir_tema(tema_id) / meta.get("nombre_guardado", "")
     if not path.exists():
         return None
-    return path.read_bytes(), meta
+    data = path.read_bytes()
+    # Rehidratar sesión si el archivo sigue en disco
+    try:
+        store[tema_id] = {"meta": meta, "bytes": data}
+    except Exception:
+        pass
+    return data, meta
 
 
 def eliminar_adjunto(tema_id: str) -> bool:
+    store = _session_store()
+    store.pop(tema_id, None)
+
     carpeta = _dir_tema(tema_id)
     if not carpeta.exists():
         return False
     for f in carpeta.iterdir():
         if f.is_file():
             f.unlink()
-    carpeta.rmdir()
+    try:
+        carpeta.rmdir()
+    except OSError:
+        pass
     return True

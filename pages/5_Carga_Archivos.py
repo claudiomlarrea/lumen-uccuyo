@@ -24,10 +24,11 @@ st.caption(
 )
 
 st.info(
-    "**Flujo LUMEN:** 1) Cargar tema → 2) Subir archivo acá (o al guardar el tema). "
-    "Después se puede descargar desde Orden del día.\n\n"
-    "**CI productivo (referencia):** el archivo va a carpetas Drive por acta/UA — "
-    "eso aún no está conectado en LUMEN."
+    "**Flujo LUMEN (ahorra pasos):** 1) Cargar tema + archivo → 2) Miembros del consejo "
+    "descargan, leen y aprueban → 3) **Elevar a Consejo Superior** traslada el tema **y** "
+    "el archivo (sin volver a subir) → 4) SGA y CS descargan el mismo documento.\n\n"
+    "En Cloud el archivo vive en la sesión/servidor de la app (no en tu Drive); "
+    "puede borrarse si la app se redespliega. Drive institucional queda para producción."
 )
 
 st.markdown("### Referencia — carpetas Drive Consejo de Investigación (2026)")
