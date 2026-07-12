@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+# Igual que en Consejo de Investigación: un tema puede involucrar varias UA.
+MAX_UNIDADES_ACADEMICAS = 5
+
 UNIDADES_ACADEMICAS = [
     "Facultad de Ciencias Médicas San Juan",
     "Facultad de Ciencias Médicas San Luis",
@@ -304,3 +307,29 @@ def objetivo_general_de(especifico: str) -> str:
 
 def sugerir_objetivo(tipo: str) -> str | None:
     return TIPO_A_OBJETIVO.get(tipo)
+
+
+def unidades_de_tema(tema: dict) -> list[str]:
+    """Lista de UA asociadas a un tema (soporta varias separadas por ';')."""
+    out: list[str] = []
+    raw = tema.get("unidad_academica") or ""
+    out.extend(x.strip() for x in str(raw).split(";") if x.strip())
+    inv = tema.get("investigacion") or {}
+    inv_u = inv.get("unidades_academicas") or ""
+    if isinstance(inv_u, list):
+        out.extend(str(x).strip() for x in inv_u if str(x).strip())
+    else:
+        out.extend(x.strip() for x in str(inv_u).split(";") if x.strip())
+    seen: set[str] = set()
+    res: list[str] = []
+    for u in out:
+        if u not in seen:
+            seen.add(u)
+            res.append(u)
+    return res
+
+
+def tema_en_unidades(tema: dict, unidades: list[str]) -> bool:
+    if not unidades:
+        return False
+    return bool(set(unidades_de_tema(tema)) & set(unidades))

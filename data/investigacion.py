@@ -6,6 +6,8 @@ import re
 import unicodedata
 from typing import Any
 
+from data.catalogs import MAX_UNIDADES_ACADEMICAS
+
 # Tipos alineados al sistema productivo (Consejo de Investigación)
 TIPOS_CI = [
     "Proyecto de Investigación",
@@ -69,7 +71,6 @@ ACTAS_CI_2026: dict[int, str] = {
 }
 
 
-MAX_UNIDADES_ACADEMICAS = 5
 
 # Unidades elegibles en carga CI (facultades, escuelas, institutos — no órganos de gobierno)
 UNIDADES_CI = [

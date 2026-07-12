@@ -17,9 +17,11 @@ from data.calendario import (
 from data.catalogs import (
     ANIOS,
     ETIQUETAS_ESTADO,
+    MAX_UNIDADES_ACADEMICAS,
     SEDES,
     UNIDADES_ACADEMICAS,
     UNIDADES_CARGA_CS_DIRECTA,
+    tema_en_unidades,
 )
 from data.orden_cs import ordenar_temas_consejo_superior
 from data.storage import (
@@ -192,17 +194,27 @@ tab_ua, tab_cs, tab_elevar, tab_sga = st.tabs(
 with tab_ua:
     st.markdown("### Descargar el orden del día de tu unidad")
     st.caption(
-        "Elegí unidad, órgano y **fecha de sesión** (la misma que cargaste en **Cargar temas**). "
+        "Elegí hasta **5 unidades académicas** (como en Consejo de Investigación), "
+        "órgano y **fecha de sesión** (la misma que cargaste en **Cargar temas**). "
         "Generá el Word para la reunión del Consejo Directivo, de Investigación o de Extensión. "
         "Las fechas del Consejo Superior están en la pestaña **Orden del día — Consejo Superior**."
     )
 
-    ua_cd = st.selectbox("Unidad académica *", UNIDADES_ACADEMICAS, key="ua_cd")
+    uas_cd = st.multiselect(
+        "Unidad académica *",
+        UNIDADES_ACADEMICAS,
+        default=[],
+        max_selections=MAX_UNIDADES_ACADEMICAS,
+        key="ua_cd",
+        help=f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. Con {MAX_UNIDADES_ACADEMICAS} elegidas, quitá una con la × para cambiar.",
+    )
+    if not uas_cd:
+        st.info("Seleccioná al menos una unidad académica.")
 
     c1, c2, c3 = st.columns([2, 1, 1])
     with c1:
         organos_ua = sorted(ORGANOS_FECHA_LIBRE)
-        organo_sug = _organo_sugerido_ua(ua_cd)
+        organo_sug = _organo_sugerido_ua(uas_cd[0]) if uas_cd else "Consejo Directivo"
         organo_cd = st.selectbox(
             "Órgano *",
             organos_ua,
@@ -217,7 +229,7 @@ with tab_ua:
     filtro_cd = [
         t
         for t in temas
-        if t.get("unidad_academica") == ua_cd
+        if tema_en_unidades(t, uas_cd)
         and t.get("anio") == anio_cd
         and t.get("organo_tratamiento") == organo_cd
         and t.get("estado") in ESTADOS_CD_OD | {"aprobado_cd"}
@@ -239,9 +251,13 @@ with tab_ua:
 
     st.metric(f"Temas para el OD — {organo_cd}", len(filtro_fecha))
 
+    ua_doc = "; ".join(uas_cd) if uas_cd else "—"
+
     with st.container(border=True):
         st.markdown("#### Generar y descargar Word del consejo de unidad")
-        if fecha_cd in {"— Elegí una fecha —", "— Sin fechas cargadas —"}:
+        if not uas_cd:
+            st.warning("Seleccioná al menos una **unidad académica**.")
+        elif fecha_cd in {"— Elegí una fecha —", "— Sin fechas cargadas —"}:
             st.warning(
                 "Seleccioná una **fecha de sesión** con temas cargados. "
                 "Si no aparece ninguna, cargá temas en **Cargar temas** con esa fecha."
@@ -249,7 +265,7 @@ with tab_ua:
         else:
             _boton_descarga(
                 filtro_fecha,
-                ua_cd,
+                ua_doc,
                 sede_cd if sede_cd != "Todas" else (filtro_fecha[0].get("sede", "—") if filtro_fecha else "—"),
                 anio_cd,
                 organo_cd,

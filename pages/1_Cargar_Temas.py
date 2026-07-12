@@ -18,6 +18,7 @@ from data.catalogs import (
     AMBITOS,
     ANIOS,
     ETIQUETAS_ESTADO,
+    MAX_UNIDADES_ACADEMICAS,
     SEDES,
     TIPOS_ACTIVIDAD,
     UNIDADES_ACADEMICAS,
@@ -43,7 +44,18 @@ st.info("Los datos se guardan solo en este prototipo (archivo local). No se env�
 st.subheader("Identificación")
 c1, c2, c3 = st.columns(3)
 with c1:
-    ua = st.selectbox("Unidad académica / administrativa *", UNIDADES_ACADEMICAS, key="ua")
+    uas = st.multiselect(
+        "Unidad académica / administrativa *",
+        UNIDADES_ACADEMICAS,
+        max_selections=MAX_UNIDADES_ACADEMICAS,
+        key="ua",
+        help=(
+            f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades (como en Consejo de Investigación). "
+            f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quitá una con la × para cambiar."
+        ),
+    )
+    ua = "; ".join(uas) if uas else ""
+    ua_principal = uas[0] if uas else ""
 with c2:
     sede = st.selectbox("Sede *", SEDES, key="sede")
 with c3:
@@ -51,10 +63,10 @@ with c3:
 
 c4, c5 = st.columns(2)
 with c4:
-    idx_ambito = AMBITOS.index("Investigación") if ua == "Secretaría Investigación" else 0
+    idx_ambito = AMBITOS.index("Investigación") if "Secretaría Investigación" in uas else 0
     ambito = st.selectbox("Ámbito *", AMBITOS, index=idx_ambito, key="ambito")
 with c5:
-    if ua == "Secretaría Investigación":
+    if "Secretaría Investigación" in uas:
         st.session_state["es_investigacion"] = "Sí"
         st.selectbox(
             "¿Es tema de investigación? *",
@@ -80,7 +92,7 @@ actividad = ""
 detalle = ""
 
 if es_inv:
-    bloque_inv_raw = render_campos_investigacion(key="carga", unidad_carga=ua)
+    bloque_inv_raw = render_campos_investigacion(key="carga", unidad_carga=ua_principal)
     tipo = bloque_inv_raw["tipo_ci"]
     actividad = bloque_inv_raw.get("titulo", "")
     detalle = bloque_inv_raw.get("descripcion", "")
@@ -90,7 +102,7 @@ else:
     with c6:
         tipo = st.selectbox("Tipo de actividad *", TIPOS_ACTIVIDAD, key="tipo")
     with c7:
-        actividades_ua = ACTIVIDADES_EJEMPLO.get(ua, [])
+        actividades_ua = ACTIVIDADES_EJEMPLO.get(ua_principal, [])
         opciones_act = actividades_ua + ["Otra actividad (cargar a mano)"]
         actividad_sel = st.selectbox("Actividad *", opciones_act, key="actividad_sel")
 
@@ -106,7 +118,7 @@ else:
     detalle = st.text_input("Detalle (opcional, máx. 20 palabras)", key="detalle")
 
 st.subheader("Sesión del orden del día")
-carga_cs_directa = puede_cargar_cs_directo(ua)
+carga_cs_directa = any(puede_cargar_cs_directo(u) for u in uas)
 if carga_cs_directa:
     st.success(
         f"**{ua}** puede cargar temas **directamente al orden del día del Consejo Superior**."
@@ -127,7 +139,7 @@ if es_inv:
         help="Temas de investigación van al Consejo de Investigación de la UA.",
     )
 else:
-    organo_default = organo_default_index(ua, carga_cs_directa)
+    organo_default = organo_default_index(ua_principal, carga_cs_directa)
     organo = st.selectbox(
         "Órgano de tratamiento *",
         ORGANOS_TRATAMIENTO,
@@ -255,6 +267,8 @@ archivo_adjunto = render_uploader_adjunto(key="carga")
 
 if st.button("Guardar tema en LUMEN", type="primary"):
     errores = []
+    if not uas:
+        errores.append(f"Seleccioná al menos una unidad académica (máx. {MAX_UNIDADES_ACADEMICAS}).")
     if not actividad or not str(actividad).strip():
         errores.append("Completá la actividad / denominación.")
     if not es_inv and len(str(actividad).split()) > 20:
