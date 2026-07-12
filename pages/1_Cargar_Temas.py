@@ -132,6 +132,12 @@ if ultimo:
             if st.button("Ir a Carga de archivos", key="ir_carga_archivos"):
                 st.switch_page("pages/5_Carga_Archivos.py")
 
+# Errores de validación del intento anterior (arriba, bien visibles)
+_errores_prev = st.session_state.pop("lumen_errores_carga", None)
+if _errores_prev:
+    for e in _errores_prev:
+        st.error(e)
+
 st.subheader("Identificación")
 # Consejo Directivo / carga habitual: una sola UA.
 # Varias UA solo en el formulario de Investigación (como en CI productivo).
@@ -177,6 +183,7 @@ bloque_inv_raw: dict | None = None
 tipo = ""
 actividad = ""
 detalle = ""
+actividad_sel = ""
 
 if es_inv:
     bloque_inv_raw = render_campos_investigacion(key="carga", unidad_carga=ua_principal)
@@ -191,18 +198,29 @@ else:
     with c7:
         actividades_ua = ACTIVIDADES_EJEMPLO.get(ua_principal, [])
         opciones_act = actividades_ua + ["Otra actividad (cargar a mano)"]
-        actividad_sel = st.selectbox("Actividad *", opciones_act, key="actividad_sel")
+        actividad_sel = st.selectbox(
+            "Actividad del catálogo *",
+            opciones_act,
+            key="actividad_sel",
+            help="Si no está en la lista, elegí «Otra actividad» y escribí el nombre abajo.",
+        )
 
     if actividad_sel == "Otra actividad (cargar a mano)":
+        st.caption("Obligatorio: el nombre del tema va acá (no en Detalle).")
         actividad = st.text_input(
-            "Escribir actividad (máx. 20 palabras) *",
-            placeholder="Describí la actividad en no más de 20 palabras",
+            "Denominación del tema / actividad *",
+            placeholder="Ej: Convenio con municipalidad de Vicuña",
             key="actividad_manual",
         )
     else:
         actividad = actividad_sel
 
-    detalle = st.text_input("Detalle (opcional, máx. 20 palabras)", key="detalle")
+    detalle = st.text_input(
+        "Detalle (opcional, máx. 20 palabras)",
+        placeholder="Dato complementario — no reemplaza la denominación",
+        key="detalle",
+        help="Opcional. La denominación del tema es el campo de arriba o el del catálogo.",
+    )
 
 st.subheader("Sesión del orden del día")
 carga_cs_directa = puede_cargar_cs_directo(ua)
@@ -355,11 +373,25 @@ _nonce = int(st.session_state.get("lumen_carga_nonce", 0))
 archivo_adjunto = render_uploader_adjunto(key=f"carga_{_nonce}")
 
 if st.button("Guardar tema en LUMEN", type="primary"):
+    # Leer textos desde session_state (evita perder valor si no se pulsó Enter)
+    if not es_inv:
+        if actividad_sel == "Otra actividad (cargar a mano)":
+            actividad = str(st.session_state.get("actividad_manual") or "").strip()
+        else:
+            actividad = actividad_sel
+        detalle = str(st.session_state.get("detalle") or "").strip()
+
     errores = []
     if not ua:
         errores.append("Seleccioná la unidad académica.")
     if not actividad or not str(actividad).strip():
-        errores.append("Completá la actividad / denominación.")
+        if not es_inv and actividad_sel == "Otra actividad (cargar a mano)":
+            errores.append(
+                "Completá **Denominación del tema / actividad** "
+                "(con «Otra actividad» el nombre no va en Detalle)."
+            )
+        else:
+            errores.append("Completá la actividad / denominación.")
     if not es_inv and len(str(actividad).split()) > 20:
         errores.append("La actividad no puede superar 20 palabras.")
     if not es_inv and detalle and len(detalle.split()) > 20:
@@ -377,9 +409,10 @@ if st.button("Guardar tema en LUMEN", type="primary"):
             fecha_reunion = bloque_inv_raw["fecha_acta"]
 
     if errores:
-        for e in errores:
-            st.error(e)
+        st.session_state["lumen_errores_carga"] = errores
+        st.rerun()
     else:
+        st.session_state.pop("lumen_errores_carga", None)
         record = {
             "unidad_academica": ua,
             "sede": sede,
@@ -389,7 +422,9 @@ if st.button("Guardar tema en LUMEN", type="primary"):
             "tipo_actividad": tipo,
             "tipo_manual": "",
             "actividad": str(actividad).strip(),
-            "actividad_manual": False,
+            "actividad_manual": (
+                (not es_inv) and actividad_sel == "Otra actividad (cargar a mano)"
+            ),
             "detalle": str(detalle).strip(),
             "organo_tratamiento": organo,
             "fecha_reunion": fecha_reunion,
