@@ -9,6 +9,7 @@ from data.catalogs import (
     TIPO_A_OBJETIVO,
     UNIDADES_ACADEMICAS,
 )
+from data.actividades_cs import ACTIVIDADES_HABITUALES_POR_UA
 from data.storage import load_catalogo_manual, load_temas
 from ui import setup_page, sidebar_brand
 
@@ -16,12 +17,17 @@ setup_page("Catálogos · LUMEN")
 sidebar_brand("Catálogos")
 
 st.markdown("## Catálogos del prototipo")
-st.caption("Desplegables base + opciones incorporadas por carga manual.")
+st.caption(
+    "Desplegables base + actividades habituales tomadas de Órdenes del Día del "
+    "Consejo Superior 2025-2026 (actas 946–961)."
+)
 
 cat = load_catalogo_manual()
 temas = load_temas()
 
-t1, t2, t3, t4 = st.tabs(["Unidades académicas", "Tipos de actividad", "Actividades por UA", "Calendario CS"])
+t1, t2, t3, t4 = st.tabs(
+    ["Unidades académicas", "Tipos de actividad", "Actividades habituales CS", "Calendario CS"]
+)
 
 with t1:
     st.write(f"**{len(UNIDADES_ACADEMICAS)}** unidades (mismo criterio institucional del PEI / Investigación).")
@@ -46,19 +52,23 @@ with t2:
     )
 
 with t3:
+    st.caption(
+        "Denominaciones recurrentes en Órdenes del Día del Consejo Superior "
+        "(actas 946–961, años 2025-2026). En **Cargar temas** aparecen como atajo opcional."
+    )
     ua = st.selectbox("Unidad académica", UNIDADES_ACADEMICAS)
-    semilla = ACTIVIDADES_EJEMPLO.get(ua, [])
+    semilla = ACTIVIDADES_HABITUALES_POR_UA.get(ua) or ACTIVIDADES_EJEMPLO.get(ua, [])
     manuales = cat.get("actividades_por_ua", {}).get(ua, [])
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("**Semilla del prototipo**")
+        st.markdown("**Habituales (OD CS)**")
         if semilla:
             for a in semilla:
                 st.write(f"- {a}")
         else:
-            st.caption("Sin semilla para esta UA.")
+            st.caption("Sin listado habitual para esta UA (aún).")
     with c2:
-        st.markdown("**Cargadas a mano**")
+        st.markdown("**Cargadas a mano en la sesión**")
         if manuales:
             for a in manuales:
                 st.write(f"- {a}")

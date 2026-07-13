@@ -36,6 +36,7 @@ _KEYS_TEMA = (
     "tipo",
     "actividad_sel",
     "actividad_manual",
+    "actividad_habitual",
     "detalle",
     "impacta_pei",
     "requiere_cs",
@@ -168,9 +169,30 @@ else:
     st.subheader("Actividad")
     tipo = st.selectbox("Tipo de actividad *", TIPOS_ACTIVIDAD, key="tipo")
     actividad_sel = ""
+
+    from data.actividades_cs import actividades_habituales_ua
+
+    habituales = actividades_habituales_ua(ua_principal)
+    if habituales:
+        opciones_hab = ["— Escribir denominación a mano —"] + habituales
+
+        def _aplicar_habitual() -> None:
+            elegida = st.session_state.get("actividad_habitual")
+            if elegida and elegida != "— Escribir denominación a mano —":
+                st.session_state["actividad_manual"] = elegida
+
+        st.selectbox(
+            "Actividades habituales de esta UA (OD CS 2025-2026, opcional)",
+            opciones_hab,
+            key="actividad_habitual",
+            on_change=_aplicar_habitual,
+            help="Atajo con denominaciones recurrentes en Órdenes del Día del Consejo Superior. "
+            "Podés elegir una o escribir la tuya abajo.",
+        )
+
     actividad = st.text_input(
         "Denominación del tema / actividad *",
-        placeholder="Ej: Convenio con municipalidad de Vicuña",
+        placeholder="Ej: Designaciones docentes · Diplomatura en… · Renuncias",
         key="actividad_manual",
         help="Nombre corto del tema (máx. 20 palabras).",
     )
