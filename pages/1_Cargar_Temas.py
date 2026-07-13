@@ -36,7 +36,6 @@ _KEYS_TEMA = (
     "tipo",
     "actividad_sel",
     "actividad_manual",
-    "actividad_habitual",
     "detalle",
     "impacta_pei",
     "requiere_cs",
@@ -94,8 +93,9 @@ sidebar_brand("Cargar temas")
 if st.session_state.pop("lumen_pendiente_limpiar_tema", False):
     _limpiar_campos_tema(dismiss_success=False)
 
-# Limpiar valor legacy del selectbox de catálogo (ya eliminado)
+# Limpiar valor legacy del selectbox de catálogo / habituales (ya eliminados)
 st.session_state.pop("actividad_sel", None)
+st.session_state.pop("actividad_habitual", None)
 
 st.markdown("## Cargar temas")
 st.caption("Registro único para orden del día, PEI e Investigación. Los datos quedan solo en este prototipo.")
@@ -169,27 +169,6 @@ else:
     st.subheader("Actividad")
     tipo = st.selectbox("Tipo de actividad *", TIPOS_ACTIVIDAD, key="tipo")
     actividad_sel = ""
-
-    from data.actividades_cs import actividades_habituales_ua
-
-    habituales = actividades_habituales_ua(ua_principal)
-    if habituales:
-        opciones_hab = ["— Escribir denominación a mano —"] + habituales
-
-        def _aplicar_habitual() -> None:
-            elegida = st.session_state.get("actividad_habitual")
-            if elegida and elegida != "— Escribir denominación a mano —":
-                st.session_state["actividad_manual"] = elegida
-
-        st.selectbox(
-            "Actividades habituales de esta UA (OD CS 2025-2026, opcional)",
-            opciones_hab,
-            key="actividad_habitual",
-            on_change=_aplicar_habitual,
-            help="Atajo con denominaciones recurrentes en Órdenes del Día del Consejo Superior. "
-            "Podés elegir una o escribir la tuya abajo.",
-        )
-
     actividad = st.text_input(
         "Denominación del tema / actividad *",
         placeholder="Ej: Designaciones docentes · Diplomatura en… · Renuncias",
