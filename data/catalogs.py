@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from data.actividades_cs import ACTIVIDADES_HABITUALES_POR_UA as ACTIVIDADES_EJEMPLO
+from data.actividades_cs import ACTIVIDADES_HABITUALES_POR_UA
 
 # Igual que en Consejo de Investigación: un tema puede involucrar varias UA.
 MAX_UNIDADES_ACADEMICAS = 5
@@ -61,21 +61,8 @@ AMBITOS = [
 ]
 
 TIPOS_ACTIVIDAD = [
-    # Recurrentes en Órdenes del Día del Consejo Superior (CD → CS)
-    "Renuncia docente / de cargo",
-    "Licencia docente / de cargo",
-    "Designación docente",
-    "Designación de cargo",
-    "Designación de ayudantes alumnos",
-    "Creación / modificación de carrera o plan de estudios",
-    "Creación de instituto / centro / consejo",
-    "Curso / capacitación / diplomatura",
     "Convenio / alianza / acta acuerdo",
-    "Aval académico / institucional",
-    "Informe de gestión / académico",
-    "Títulos / colación / egreso",
-    "Distinciones / reconocimientos",
-    # Resto del catálogo LUMEN / PEI / Investigación
+    "Curso / capacitación / diplomatura",
     "Jornada / evento académico",
     "Encuentro / congreso científico",
     "Seminario / taller",
@@ -104,6 +91,13 @@ TIPOS_ACTIVIDAD = [
     "Emprendedurismo",
     "Responsabilidad social universitaria",
     "Comunicación institucional",
+    # Habituales CD → Consejo Superior (OD 2025-2026)
+    "Designación docente",
+    "Renuncia docente",
+    "Licencia docente",
+    "Creación de Carrera",
+    "Creación de Plan de Estudios",
+    "Modificación de Plan de Estudios",
     "Otro (cargar a mano)",
 ]
 
@@ -191,17 +185,6 @@ OBJETIVOS_GENERALES = {
 
 # Matriz tipo → objetivo PEI sugerido (prototipo)
 TIPO_A_OBJETIVO = {
-    "Renuncia docente / de cargo": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
-    "Licencia docente / de cargo": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
-    "Designación docente": "4.4. Implementar un Régimen de dedicación docente para  la incorporación, permanencia y promoción de los recursos humanos de la institución",
-    "Designación de cargo": "4.4. Implementar un Régimen de dedicación docente para  la incorporación, permanencia y promoción de los recursos humanos de la institución",
-    "Designación de ayudantes alumnos": "5.4. Impulsar la participación de estudiantes y graduados en actividades de investigación",
-    "Creación / modificación de carrera o plan de estudios": "1.6 Establecer planes de mejora",
-    "Creación de instituto / centro / consejo": "1.6 Establecer planes de mejora",
-    "Aval académico / institucional": "2.2. Fortalecer la participación institucional en eventos y reuniones científico académicas",
-    "Informe de gestión / académico": "1.7 Monitoreo y seguimiento periódico",
-    "Títulos / colación / egreso": "5.7. Fortalecer el seguimiento de los graduados",
-    "Distinciones / reconocimientos": "5.7. Fortalecer el seguimiento de los graduados",
     "Convenio / alianza / acta acuerdo": "2.1 Actualizar e implementar convenios y alianzas estratégicas",
     "Curso / capacitación / diplomatura": "2.7. Desarrollar programas de educación continua",
     "Jornada / evento académico": "2.2. Fortalecer la participación institucional en eventos y reuniones científico académicas",
@@ -232,6 +215,12 @@ TIPO_A_OBJETIVO = {
     "Emprendedurismo": "5.6. Fomentar el emprendedurismo en estudiantes y graduados.",
     "Responsabilidad social universitaria": "2.6. Fomentar la Responsabilidad Social Universitaria",
     "Comunicación institucional": "2.3. Desarrollar un Plan de Comunicación interna y externa con enfoque integral",
+    "Designación docente": "4.4. Implementar un Régimen de dedicación docente para  la incorporación, permanencia y promoción de los recursos humanos de la institución",
+    "Renuncia docente": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
+    "Licencia docente": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
+    "Creación de Carrera": "1.6 Establecer planes de mejora",
+    "Creación de Plan de Estudios": "1.6 Establecer planes de mejora",
+    "Modificación de Plan de Estudios": "1.6 Establecer planes de mejora",
 }
 
 ESTADOS = [
@@ -285,6 +274,57 @@ def es_unidad_academica_facultad(ua: str) -> bool:
         "Área de Orientación Universitaria",
         "Secretaría Académica",
     }
+
+
+# Semilla original + actividades habituales de OD CS (unión por UA, sin duplicar).
+_ACTIVIDADES_SEMILLA = {
+    "Secretaría Investigación": [
+        "Presentación del cronograma anual",
+        "Rendición de cuentas y cierre del Programa PRONIS",
+        "Propuesta de categorización anual de investigadores",
+        "Charla informativa sobre nueva normativa",
+        "Planificación de Jornadas de Investigación",
+        "Semillero de Inteligencia Artificial",
+        "Programa de Fortalecimiento de los Institutos",
+        "Líneas prioritarias de investigación",
+    ],
+    "Rectorado": [
+        "Participación en reunión regional ODUCAL",
+        "Presentación institucional del Plan AURA",
+        "Reunión de equipos de gestión",
+    ],
+    "Secretaría General Académica": [
+        "Informe de gestión académica",
+        "Propuesta normativa académica",
+        "Seguimiento de acreditaciones",
+    ],
+    "Facultad de Ciencias Económicas y Empresariales San Juan": [
+        "Firma de convenio con municipio",
+        "Diplomatura en industria minera",
+        "Jornada de puertas abiertas",
+    ],
+}
+
+
+def _unir_actividades(*listas: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for lista in listas:
+        for item in lista:
+            if item not in seen:
+                seen.add(item)
+                out.append(item)
+    return out
+
+
+ACTIVIDADES_EJEMPLO: dict[str, list[str]] = {}
+_uas = set(_ACTIVIDADES_SEMILLA) | set(ACTIVIDADES_HABITUALES_POR_UA)
+for _ua in sorted(_uas):
+    ACTIVIDADES_EJEMPLO[_ua] = _unir_actividades(
+        _ACTIVIDADES_SEMILLA.get(_ua, []),
+        ACTIVIDADES_HABITUALES_POR_UA.get(_ua, []),
+    )
+
 
 def all_objetivos() -> list[str]:
     items: list[str] = []

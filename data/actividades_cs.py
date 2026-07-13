@@ -6,34 +6,23 @@ Son denominaciones cortas recurrentes que las UA elevan desde CD/CI/CE al CS.
 
 from __future__ import annotations
 
-# Tipos que aparecen de forma sistemática en los OD del CS (además de los ya existentes).
 TIPOS_HABITUALES_CS = [
-    "Renuncia docente / de cargo",
-    "Licencia docente / de cargo",
     "Designación docente",
-    "Designación de cargo",
-    "Designación de ayudantes alumnos",
-    "Creación / modificación de carrera o plan de estudios",
-    "Creación de instituto / centro / consejo",
-    "Aval académico / institucional",
-    "Informe de gestión / académico",
-    "Títulos / colación / egreso",
-    "Distinciones / reconocimientos",
+    "Renuncia docente",
+    "Licencia docente",
+    "Creación de Carrera",
+    "Creación de Plan de Estudios",
+    "Modificación de Plan de Estudios",
 ]
 
 # PEI sugerido para tipos habituales de CS
 TIPO_CS_A_OBJETIVO = {
-    "Renuncia docente / de cargo": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
-    "Licencia docente / de cargo": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
     "Designación docente": "4.4. Implementar un Régimen de dedicación docente para  la incorporación, permanencia y promoción de los recursos humanos de la institución",
-    "Designación de cargo": "4.4. Implementar un Régimen de dedicación docente para  la incorporación, permanencia y promoción de los recursos humanos de la institución",
-    "Designación de ayudantes alumnos": "5.4. Impulsar la participación de estudiantes y graduados en actividades de investigación",
-    "Creación / modificación de carrera o plan de estudios": "1.6 Establecer planes de mejora",
-    "Creación de instituto / centro / consejo": "1.6 Establecer planes de mejora",
-    "Aval académico / institucional": "2.2. Fortalecer la participación institucional en eventos y reuniones científico académicas",
-    "Informe de gestión / académico": "1.7 Monitoreo y seguimiento periódico",
-    "Títulos / colación / egreso": "5.7. Fortalecer el seguimiento de los graduados",
-    "Distinciones / reconocimientos": "5.7. Fortalecer el seguimiento de los graduados",
+    "Renuncia docente": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
+    "Licencia docente": "4.1. Realizar el análisis de necesidades de recursos humanos de la institución",
+    "Creación de Carrera": "1.6 Establecer planes de mejora",
+    "Creación de Plan de Estudios": "1.6 Establecer planes de mejora",
+    "Modificación de Plan de Estudios": "1.6 Establecer planes de mejora",
 }
 
 # Actividades habituales por unidad (denominaciones cortas para carga en LUMEN)
